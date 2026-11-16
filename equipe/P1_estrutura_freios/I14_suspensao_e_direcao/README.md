@@ -1,5 +1,9 @@
 # Item 14 — Suspensão e direção
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 14 (p. 12). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P1 — Estrutura, freios, massa e custos  
 **Enunciado / tarefa:** Tipos, cargas admissíveis, dimensões, materiais e massas.  
 **Depende de:** I15 (P1), I02 (P1)  

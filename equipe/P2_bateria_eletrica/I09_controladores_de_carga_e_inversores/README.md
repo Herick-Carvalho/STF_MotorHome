@@ -1,5 +1,9 @@
 # Item 09 — Controladores de carga e inversores
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 9 (p. 10). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P2 — Bateria, elétrica e fios  
 **Enunciado / tarefa:** Modelos reais, tensão de operação, potências, eficiências e limites.  
 **Depende de:** I06 (P2), I08 (P5)  

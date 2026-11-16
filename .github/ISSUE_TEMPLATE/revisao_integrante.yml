@@ -1,0 +1,55 @@
+name: Revisão do integrante
+description: Parecer de um integrante sobre os próprios itens do relatório final.
+title: "Revisão Pn — "
+labels: ["revisao"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Siga o [guia de revisão](https://github.com/MHC-CodeSmith/STF_MotorHome/blob/main/docs/REVISAO_INTEGRANTES.md)
+        e o [relatório](https://github.com/MHC-CodeSmith/STF_MotorHome/blob/main/relatorio/relatorio.pdf). Uma issue por integrante.
+  - type: dropdown
+    id: integrante
+    attributes:
+      label: Integrante
+      options:
+        - P1 — Estrutura, freios, massa e custo
+        - P2 — Bateria, elétrica e cabos
+        - P3 — Carroceria, CAD e CFD
+        - P4 — Motor, transmissão e dinâmica
+        - P5 — Solar, autonomia e otimização
+        - P6 — Interior, climatização e cabine
+        - P7 — Arrefecimento e térmica da bateria
+    validations:
+      required: true
+  - type: input
+    id: nome
+    attributes:
+      label: Seu nome (como deve aparecer na capa)
+    validations:
+      required: true
+  - type: dropdown
+    id: parecer
+    attributes:
+      label: Parecer
+      options:
+        - Aprovado sem correções
+        - Aprovado com as correções abaixo
+        - Precisa refazer (explique abaixo)
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Conferi
+      options:
+        - label: enunciado de cada item atendido
+        - label: valores com unidade, condição e fonte
+        - label: método, hipóteses e limitações corretos
+        - label: figuras legíveis, com eixos e unidades
+        - label: decisões provisórias (A01–A16) em que sou responsável
+  - type: textarea
+    id: correcoes
+    attributes:
+      label: Correções (item, página e o que muda)
+      placeholder: "I19, p. 17: ..."

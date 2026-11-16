@@ -1,5 +1,9 @@
 # Item 08 — Painel fotovoltaico
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 8 (p. 8). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P5 — Solar, autonomia e viagem  
 **Enunciado / tarefa:** Área, eficiência, tecnologia, potência, massa, montagem e configuração.  
 **Depende de:** I17 (P3)  

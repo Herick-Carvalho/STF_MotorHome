@@ -1,5 +1,9 @@
 # Item 26 — Consumo (km/kWh)
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 26 (p. 22). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P5 — Solar, autonomia e viagem  
 **Enunciado / tarefa:** Distância percorrida por energia elétrica da bateria (km/kWh) a 40 e 80 km/h; explicitar auxiliares.
 **Depende de:** I21 (P4), I22 (P4), I23 (P2), I13 (P6)  

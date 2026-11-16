@@ -1,5 +1,9 @@
 # Item 32 — Potência térmica de A/C
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 32 (p. 25). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P6 — Interior, conforto e cabine  
 **Enunciado / tarefa:** Manter 25°C internos com 33°C externos ao meio-dia e passageiro(s); regime permanente.  
 **Depende de:** I11 (P6), I13 (P6), I16 (P3), I17 (P3), I31 (P6)  

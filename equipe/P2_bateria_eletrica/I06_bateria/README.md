@@ -1,5 +1,9 @@
 # Item 06 — Bateria
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 6 (p. 6). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P2 — Bateria, elétrica e fios  
 **Enunciado / tarefa:** Escolher células/pack/BMS: tecnologia, tensão, massa, limites, curva e segurança.  
 **Depende de:** I04 (P4)  

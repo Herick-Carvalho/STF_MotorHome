@@ -1,5 +1,9 @@
 # Item 30 — Temperatura de cabos multidimensional
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 30 (p. 24). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P2 — Bateria, elétrica e fios  
 **Enunciado / tarefa:** Potência máxima do motor; perdas Joule com resistividade dependente da temperatura; simulação 2D/3D.  
 **Depende de:** I04 (P4), I07 (P2)  

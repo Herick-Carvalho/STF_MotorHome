@@ -44,20 +44,10 @@ Entrega oficial **02/12/2026 06:00** por e-mail aos dois docentes: PDF < 20 MB, 
 - Torre roda o FR3 real ao vivo: nada de CFD lá.
 - snappyHexMesh: `maxGlobalCells` corta o refinamento em silêncio — procurar "reached limit" no log.
 
-## Em andamento (16/11, fim da tarde) — revisão por integrante
-Pedido do usuário: (1) conferir no repositório se está tudo pronto para cada integrante revisar a sua parte;
-(2) escrever a mensagem de WhatsApp pedindo a revisão pelo repositório; (3) confirmar se o repositório é público.
-Feito até aqui: só leitura. Existem `docs/guia_revisao.md` (checklist de aceitação, 12 linhas),
-`docs/APROVACOES_FINAIS_PENDENTES.md` (167 linhas, aprovações A01–A16 sem registro), `docs/marcos_e_revisoes.md`,
-`equipe/P1_estrutura_freios` … `equipe/P7_arrefecimento` e `metadata/itens.csv` (dono de cada item).
-Próximo passo exato:
-1. Ler `metadata/itens.csv`, `docs/APROVACOES_FINAIS_PENDENTES.md` e o conteúdo de `equipe/P*/`; conferir se cada
-   item I01–I35 tem dono, seção no relatório (`\itemsec{n}` em relatorio/relatorio.tex), script/saída e um lugar
-   para registrar a aprovação (nome, data, commit).
-2. Ver visibilidade: `gh repo view MHC-CodeSmith/STF_MotorHome --json visibility` (rodar na torre; o lenovo não tem gh).
-3. Corrigir lacunas pequenas (ex.: um arquivo de revisão por integrante com itens, páginas do PDF e checklist),
-   commitar como MHC sem trailer, push para main e hub/tarefas-motorhome-com-codex.
-4. Entregar ao usuário a mensagem de WhatsApp (pt-BR): link do repo, PDF em relatorio/relatorio.pdf, onde fica a
-   parte de cada um (Pn → itens), checklist, como registrar a aprovação, prazo (M6 30/11; entrega 02/12 06:00),
-   visualizador 3D https://claude.ai/artifact/SwLMR3bhXRuDWDFQ7g8hCu (privado: só abre se compartilhado).
-Estado do CAD: commit f216e92 (colisões resolvidas, figuras corrigidas), CI verde nos dois ramos.
+## Revisão por integrante (16/11, pronto)
+Repositório confirmado **público** (só MHC-CodeSmith tem escrita). Integrantes revisam pelo navegador e registram o
+parecer numa issue com o formulário `.github/ISSUE_TEMPLATE/revisao_integrante.yml` (rótulo `revisao`), ou pelo WhatsApp.
+Guia com itens, páginas e decisões A01–A16 de cada um: `docs/REVISAO_INTEGRANTES.md` (tabela de pareceres no fim, a
+preencher quando as issues fecharem). Cada `equipe/Pn/Ixx/README.md` ganhou o bloco `revisao-final` apontando para a seção
+do PDF. As páginas foram tiradas do sumário do PDF de 16/11 (52 p.): se o relatório mudar, rodar de novo o gerador
+(o script ficou em /tmp/gerar_revisao.py do lenovo; a tabela PAG no topo).

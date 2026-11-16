@@ -1,5 +1,9 @@
 # Item 05 — Transmissão
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 5 (p. 6). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P4 — Motor, transmissão e dinâmica  
 **Enunciado / tarefa:** Selecionar transmissão e relações; documentar eficiência.  
 **Depende de:** I04 (P4), I02 (P1)  

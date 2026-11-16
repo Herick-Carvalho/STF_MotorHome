@@ -1,5 +1,9 @@
 # Item 01 — Nome e conceito do veículo
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 1 (p. 4). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P1 — Estrutura, freios, massa e custos  
 **Enunciado / tarefa:** Definir nome, referência e requisitos de veículo habitável para pelo menos duas pessoas.  
 **Depende de:** Requisitos gerais e decisões de conceito  

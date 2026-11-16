@@ -1,5 +1,9 @@
 # Item 29 — Otimização viagem 7000 km
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 29 (p. 23). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P5 — Solar, autonomia e viagem  
 **Enunciado / tarefa:** Otimizar velocidade/horário para Belém–Chuí: só bateria inicial e solar, <=8h dirigindo por dia.  
 **Depende de:** I25 (P5), I26 (P5), I27 (P5), I23 (P2)  

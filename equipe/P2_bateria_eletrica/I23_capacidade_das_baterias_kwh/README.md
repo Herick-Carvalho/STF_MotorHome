@@ -1,5 +1,9 @@
 # Item 23 — Capacidade das baterias (kWh)
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 23 (p. 20). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P2 — Bateria, elétrica e fios  
 **Enunciado / tarefa:** Dimensionar energia útil/nominal, SOC, limites e margens.  
 **Depende de:** I06 (P2), I08 (P5), I13 (P6), I22 (P4)  

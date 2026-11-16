@@ -1,5 +1,9 @@
 # Item 33 — Freio: campo térmico multidimensional
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 33 (p. 25). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P1 — Estrutura, freios, massa e custos
 **Enunciado / tarefa:** Frenagem de 30m/s para 10m/s em 5s, 25°C inicial; calcular energia e campo térmico 2D/3D.
 **Depende de:** I03 (P1), I18 (P1)

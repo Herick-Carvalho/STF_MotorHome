@@ -27,7 +27,8 @@ dicionários, logs, histórico de forças e resumos (reproduzíveis por
 
 - Interface CC solar→tração (B01) segue hipótese; I25/I27/I29 dependem dela.
 - Sem aprovação humana registrada (A01–A16); cada integrante revisa a própria seção.
-- Nomes dos integrantes na capa do relatório e visibilidade do repositório GitHub: a conferir.
+- Nomes dos integrantes na capa do relatório: a preencher. Repositório GitHub público (conferido em 16/11);
+  revisão por integrante em `docs/REVISAO_INTEGRANTES.md`.
 
 ## Incidente
 

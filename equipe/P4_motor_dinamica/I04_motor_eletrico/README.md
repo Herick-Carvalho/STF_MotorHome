@@ -1,5 +1,9 @@
 # Item 04 — Motor elétrico
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 4 (p. 6). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P4 — Motor, transmissão e dinâmica  
 **Enunciado / tarefa:** Apresentar potência máxima, eficiência e curvas torque/potência versus RPM.  
 **Depende de:** I15 (P1)  

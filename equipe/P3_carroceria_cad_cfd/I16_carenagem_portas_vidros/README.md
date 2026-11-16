@@ -1,5 +1,9 @@
 # Item 16 — Carenagem, portas, vidros
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 16 (p. 13). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P3 — Carroceria, CAD e CFD  
 **Enunciado / tarefa:** Geometria e materiais da envoltória, portas, aberturas e vidros.  
 **Depende de:** I15 (P1)  

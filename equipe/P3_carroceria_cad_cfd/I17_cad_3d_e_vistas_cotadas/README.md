@@ -1,5 +1,9 @@
 # Item 17 — CAD 3D e vistas cotadas
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 17 (p. 13). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P3 — Carroceria, CAD e CFD  
 **Enunciado / tarefa:** Geometria 3D; vistas frontal, superior e lateral cotadas; área de teto, área frontal e volume.  
 **Depende de:** I15 (P1), I16 (P3), I13 (P6)  

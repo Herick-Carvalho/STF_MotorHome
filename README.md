@@ -4,6 +4,16 @@
 
 **Estado do estudo em 12/11/2026:** desenvolvimento computacional dos 35 itens, preservando as 61 decisões. Os resultados são cálculos, simulações ou sensibilidades sob as hipóteses indicadas em cada evidência. O projeto **não está validado fisicamente**: há zero aprovações humanas finais, e a missão solar não foi demonstrada. Arquitetura B (interface DC externa para tração) continua hipótese sem comprovação de compatibilidade ou autorização OEM.
 
+<!-- entrega-final:inicio -->
+## Entrega final (16/11/2026)
+
+- [Relatório (PDF)](relatorio/relatorio.pdf) · [slides](relatorio/slides.pdf) · [roteiro do vídeo](relatorio/roteiro_video.md)
+- **Revisão por integrante:** [guia, itens e páginas de cada um](docs/REVISAO_INTEGRANTES.md) · [registrar parecer](https://github.com/MHC-CodeSmith/STF_MotorHome/issues/new?template=revisao_integrante.yml)
+- [Fechamento dos 35 itens](docs/FECHAMENTO_35_ITENS.md)
+
+O estado descrito abaixo (12/11) é histórico; os resultados vigentes estão no relatório.
+<!-- entrega-final:fim -->
+
 ## Revisão rápida
 
 - [Retomada compacta e QA mais recente](docs/RETOMADA_COMPACTA.md)

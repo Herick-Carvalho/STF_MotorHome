@@ -1,5 +1,9 @@
 # Item 22 — Potência resistiva e tração
 
+<!-- revisao-final:inicio -->
+> **Estado em 16/11/2026:** o resultado final está no [relatório](../../../relatorio/relatorio.pdf), seção 22 (p. 20). Para revisar e registrar o parecer, siga o [guia de revisão por integrante](../../../docs/REVISAO_INTEGRANTES.md). O texto abaixo é o histórico do desenvolvimento; onde ele disser "em desenvolvimento", vale o relatório.
+<!-- revisao-final:fim -->
+
 **Responsável:** P4 — Motor, transmissão e dinâmica  
 **Enunciado / tarefa:** Curvas de potência versus velocidade, eficiência e envelope de tração disponível.  
 **Depende de:** I04 (P4), I05 (P4), I21 (P4)  
