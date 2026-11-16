@@ -287,7 +287,7 @@ impedância dos cabos ou um fusível de classe superior.
 
 \begin{figure}[H]
 \centering\includegraphics[width=0.85\linewidth]{cad_rotas.png}
-\caption{Item 7 — rotas reservadas de cabos de \SI{48}{V} (positivo em vermelho, retorno em preto) e de água (azul) no layout A; equipamentos em cinza translúcido.}
+\caption{Item 7 — rotas reservadas de cabos de \SI{48}{V} (positivo em vermelho, retorno em preto) e de água (azul) no layout A; equipamentos em cinza translúcido. A linha da pia corre sob o piso e sobe atrás do gabinete da cozinha.}
 \label{fig:rotas}
 \end{figure}
 
@@ -432,10 +432,17 @@ $U = \SI{0,746}{W/(m^2.K)}$ nas paredes opacas.}
 com o deck solar. A Figura~\ref{fig:layout} mostra o arranjo interno cotado e a
 Figura~\ref{fig:corte}, o corte longitudinal da montagem completa. O interior fica no referencial
 do projeto: face interna traseira em $x=-3{,}35$\,m e piso acabado a \SI{0,68}{m} do solo.}
-\limite{a checagem de colisões da montagem (\texttt{relatorio/montagem\_cad.py}) encontra o banco de
-US5000 avançando cerca de \SI{7}{cm} sobre a caixa de roda traseira esquerda quando ela é posta sobre
-o eixo real; as dimensões da caixa de roda são estimadas e precisam ser conferidas no desenho do
-fabricante.}
+A checagem de colisões da montagem (\texttt{relatorio/montagem\_cad.py}) mostrou o banco de US5000
+\SI{7}{cm} dentro da caixa de roda traseira esquerda posta sobre o eixo real, e os cabos de
+\SI{48}{V} passando por ela. No layout A o banco passou a apoiar sobre a caixa de roda (topo a
+\SI{1,54}{m}, abaixo do estrado da cama) e os cabos descem pela frente do inversor; no layout B o banco
+entra \SI{18,5}{cm} para o centro. A linha de água da pia, que cruzava o banheiro e o corredor à
+altura da cintura, agora desce ao lado da bomba, corre sob o piso e sobe atrás do gabinete da cozinha.
+Com essas mudanças a montagem não tem colisões; restam só os terminais das rotas e as passagens pelo
+piso e pela bancada.
+\limite{as dimensões da caixa de roda são estimadas e precisam ser conferidas no desenho do
+fabricante; o banco mais alto eleva o centro de massa em menos de \SI{1}{cm}, efeito não incluído no
+item 18.}
 
 \begin{figure}[H]
 \centering\includegraphics[width=\linewidth]{i17_vistas_exterior.png}

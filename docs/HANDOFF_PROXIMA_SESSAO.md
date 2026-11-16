@@ -34,8 +34,9 @@ Entrega oficial **02/12/2026 06:00** por e-mail aos dois docentes: PDF < 20 MB, 
 - Referencial CAD: `relatorio/montagem_cad.py` monta tudo no referencial do projeto (traseira interna x = −3,35 m, piso z = 0,68 m,
   largura centrada; rotas e teto Maxeon exportados com y a partir da lateral). O deck fica na posição do `pvdeck.stl` do CFD
   (x − 3,482, y − 0,91, z + 0,648 sobre o arquivo do teto). O antigo offset −3,482/0,648 aplicado ao interior o enfiava 13 cm
-  nas portas traseiras (corrigido em 16/11). Achado aberto: banco US5000 invade ~7 cm a caixa de roda traseira esquerda
-  posta sobre o eixo real (dimensões da caixa de roda estimadas).
+  nas portas traseiras (corrigido em 16/11). Colisões resolvidas na montagem: banco US5000 sobre a caixa de roda (A) ou
+  18,5 cm para o centro (B); cabos 48 V pela frente do inversor; linha da pia sob o piso. Os arquivos de rotas em
+  entregas/ não mudaram (rastreados pelo verificador). Figuras: `fatiar()` divide triângulos longos (matplotlib sem z-buffer).
 
 ## Cuidados
 - mhc-lenovo (15 GB, swap cheio) reiniciou sem shutdown em 16/11 12:31 durante CFD: rodar pesado com

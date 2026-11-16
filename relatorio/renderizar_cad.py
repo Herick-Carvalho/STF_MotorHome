@@ -70,9 +70,31 @@ def step_para_stl(caminho: Path) -> Path:
     return destino
 
 
-def desenhar(ax, lista, alfa=None, aresta=None):
+def fatiar(tri: np.ndarray, lim: float = 0.15) -> np.ndarray:
+    """Divide triângulos pela aresta mais longa até todas ficarem abaixo de `lim` (m).
+
+    O matplotlib não tem z-buffer: ordena polígonos inteiros pela profundidade média. Um triângulo
+    longo (piso de 3,6 m, divisória) recebe uma profundidade só e é pintado por cima do que está à
+    frente dele, aparecendo como uma cunha diagonal. Triângulos pequenos ordenam corretamente."""
+    prontos = []
+    while len(tri):
+        e = np.stack([np.linalg.norm(tri[:, (i + 1) % 3] - tri[:, i], axis=1) for i in range(3)], axis=1)
+        longo = e.max(1) > lim
+        prontos.append(tri[~longo])
+        t, k = tri[longo], e[longo].argmax(1)
+        a = t[np.arange(len(t)), k]
+        b = t[np.arange(len(t)), (k + 1) % 3]
+        c = t[np.arange(len(t)), (k + 2) % 3]
+        m = (a + b) / 2
+        tri = np.concatenate([np.stack([a, m, c], 1), np.stack([m, b, c], 1)])
+    return np.concatenate(prontos) if prontos else tri
+
+
+def desenhar(ax, lista, alfa=None, aresta=None, lim=0.15):
     tris, cores = [], []
     for nome, tri, rgb in lista:
+        if lim:
+            tri = fatiar(tri, lim)
         n = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
         n /= np.linalg.norm(n, axis=1, keepdims=True) + 1e-12
         luz = 0.42 + 0.58 * np.abs(n @ LUZ)
@@ -219,12 +241,18 @@ def cad() -> None:
     instal = lambda n: any(k in n for k in ("cabo", "tanque_bomba", "bomba_boiler", "principal_pia"))
     alfa = {p.nome: 0.35 for p in rotas if not instal(p.nome)}
     fig, axs = figura_3d(1, (10, 5))
-    tri = desenhar(axs[0], [(p.nome, p.tri, p.rgb) for p in rotas if not instal(p.nome)], alfa=alfa)
-    desenhar(axs[0], [(p.nome, p.tri, p.rgb) for p in rotas if instal(p.nome)])
-    enquadrar(axs[0], tri, 30, -55, zoom=1.35)
+    sob_piso = lambda p: instal(p.nome) and p.v[:, 2].max() < M.PISO_Z - 0.02
+    piso = [p for p in G["layoutA"] if p.nome == "piso"]
+    pack = [p for p in G["tracao"] if p.nome.startswith("pack_tracao")]
+    t_pack = desenhar(axs[0], [(p.nome, p.tri, p.rgb) for p in pack], alfa=0.25)
+    desenhar(axs[0], [(p.nome, p.tri, p.rgb) for p in rotas if sob_piso(p)])          # sob o piso: antes dele
+    tri = desenhar(axs[0], [(p.nome, p.tri, p.rgb) for p in piso], alfa=0.45)
+    tri = np.concatenate([tri, desenhar(axs[0], [(p.nome, p.tri, p.rgb) for p in rotas if not instal(p.nome)], alfa=alfa)])
+    desenhar(axs[0], [(p.nome, p.tri, p.rgb) for p in rotas if instal(p.nome) and not sob_piso(p)])
+    enquadrar(axs[0], np.concatenate([tri, t_pack]), 30, -55, zoom=1.15)
     caixas = [M.Peca("rotas", p.nome, p.v, p.f, p.rgb, M.limpar(p.nome)) for p in rotas]
     rotular(axs[0], caixas)
-    axs[0].set_title("Rotas reservadas: cabos 48 V (vermelho +, preto −) e água (azul), layout A", fontsize=9)
+    axs[0].set_title("Rotas: cabos 48 V (vermelho +, preto −) e água (azul), layout A; linha da pia sob o piso", fontsize=9)
     salvar(fig, "cad_rotas.png")
 
     # 6. teto em planta

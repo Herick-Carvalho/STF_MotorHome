@@ -31,6 +31,13 @@ LARGURA = 1.794                                  # largura interna (1,87 m - 2 x
 DECK = np.array([-3.482, -0.91, 0.648])          # deck: mesma posição do pvdeck.stl do CFD (I19)
 TETO_Z = 2.612                                   # topo do teto da carroceria
 ARCO = (0.85, 0.224, 0.35)                       # caixa de roda (config/parametros_globais.yaml, geometry)
+# O banco US5000 dos layouts (piso a 0,72 m) invadia ~7 cm a caixa de roda esquerda posta sobre o eixo real.
+# Layout A: o banco sobe e apoia sobre a caixa de roda (topo a 1,543 m, abaixo do estrado a 1,66 m).
+# Layout B: o banco do sofá fica a 1,26 m, então o banco de baterias entra 18,5 cm para o centro e o tanque
+# de água limpa recua 4,5 cm (as alças do banco ficam a 1 cm dele).
+SUBIDA_BANCO = PISO_Z + ARCO[2] + 0.01 - 0.72
+RECUO_BANCO_B = (LARGURA / 2 - ARCO[1] - 0.005) - 0.853
+RAIO_TUBO, RAIO_CABO = 0.007, 0.007
 
 CORES = {
     "energia": (0.20, 0.42, 0.78), "agua": (0.22, 0.70, 0.82), "eletro": (0.93, 0.55, 0.20),
@@ -277,6 +284,10 @@ def interior(layout: str) -> list[Peca]:
             caixas[k] = (v + [-0.06, 0, 0], f)
         if layout == "B" and k.endswith("divisoria_2.54"):  # no B a lava e seca vai até 2,64: divisória logo depois
             caixas[k] = (v + [0.112, 0, 0], f)
+        if "US5000" in k:                                  # fora da caixa de roda (ver SUBIDA_BANCO)
+            caixas[k] = (v + ([0, 0, SUBIDA_BANCO] if layout == "A" else [0, RECUO_BANCO_B, 0]), f)
+        if layout == "B" and k.endswith("tanque_limpa"):
+            caixas[k] = (v + [0, -0.045, 0], f)
     det = _detalhes_24_10()
     saida: list[Peca] = []
     substituidas = set()
@@ -366,11 +377,21 @@ def interior(layout: str) -> list[Peca]:
             v2[:, 2] = np.maximum(v2[:, 2], fundo)
         saida.append(Peca(grupo, limpar(n), v2, f, cor_detalhe(n), "tampo"))
     cu = np.vstack([p.v for p in saida if p.dono == "tampo" and "cuba" in p.nome])
-    vv, ff = caixas_unidas([([cu.min(0)[0] - 0.015, cu.min(0)[1] - 0.015, tampo[1][2]], [cu.max(0)[0] + 0.015, cu.min(0)[1], tampo[1][2] + 0.002]),
-                            ([cu.min(0)[0] - 0.015, cu.max(0)[1], tampo[1][2]], [cu.max(0)[0] + 0.015, cu.max(0)[1] + 0.015, tampo[1][2] + 0.002]),
-                            ([cu.min(0)[0] - 0.015, cu.min(0)[1], tampo[1][2]], [cu.min(0)[0], cu.max(0)[1], tampo[1][2] + 0.002]),
-                            ([cu.max(0)[0], cu.min(0)[1], tampo[1][2]], [cu.max(0)[0] + 0.015, cu.max(0)[1], tampo[1][2] + 0.002]),
-                            ([cu.min(0)[0], cu.min(0)[1], tampo[1][2] - 0.004], [cu.max(0)[0], cu.max(0)[1], tampo[1][2] + 0.001])])
+    t = tampo[1][2]
+    lo_c, hi_c = cu.min(0), cu.max(0)
+    # bancada com recorte para a cuba (sem faces coplanares: o matplotlib não tem z-buffer) e aro inox no recorte
+    k_tampo = achar("tampo")
+    r_lo, r_hi = lo_c - 0.015, hi_c + 0.015
+    t_lo, t_hi = tampo
+    vv, ff = caixas_unidas([([t_lo[0], t_lo[1], t_lo[2]], [r_lo[0], t_hi[1], t_hi[2]]),
+                            ([r_hi[0], t_lo[1], t_lo[2]], [t_hi[0], t_hi[1], t_hi[2]]),
+                            ([r_lo[0], t_lo[1], t_lo[2]], [r_hi[0], r_lo[1], t_hi[2]]),
+                            ([r_lo[0], r_hi[1], t_lo[2]], [r_hi[0], t_hi[1], t_hi[2]])])
+    caixas[k_tampo] = (vv, ff)
+    vv, ff = caixas_unidas([([r_lo[0], r_lo[1], t - 0.004], [r_hi[0], lo_c[1], t + 0.003]),
+                            ([r_lo[0], hi_c[1], t - 0.004], [r_hi[0], r_hi[1], t + 0.003]),
+                            ([r_lo[0], lo_c[1], t - 0.004], [lo_c[0], hi_c[1], t + 0.003]),
+                            ([hi_c[0], lo_c[1], t - 0.004], [r_hi[0], hi_c[1], t + 0.003])])
     saida.append(Peca(grupo, "borda_cuba", vv, ff, (0.80, 0.81, 0.83), "tampo"))
     del p_all
     yf = tampo[1][1]
@@ -417,6 +438,21 @@ def interior(layout: str) -> list[Peca]:
     return saida
 
 
+def tubo(pontos, raio, nome, rgb, grupo="rotas"):
+    """Polilinha de cilindros (um por trecho) com esferas nas curvas."""
+    saida = []
+    p = [np.asarray(q, float) for q in pontos]
+    for i, (a, b) in enumerate(itertools.pairwise(p)):
+        if np.linalg.norm(b - a) < 1e-6:
+            continue
+        v, f = cilindro(a, b, raio, 12)
+        saida.append(Peca(grupo, f"{nome}_{i}", v, f, rgb))
+    for i, q in enumerate(p[1:-1]):
+        e = trimesh.creation.icosphere(subdivisions=1, radius=raio)
+        saida.append(Peca(grupo, f"{nome}_curva{i}", np.asarray(e.vertices) + q, np.asarray(e.faces), rgb))
+    return saida
+
+
 def rotas() -> list[Peca]:
     def cor(n):
         if "cabo_positivo" in n:
@@ -427,8 +463,29 @@ def rotas() -> list[Peca]:
             return (0.15, 0.55, 0.95)
         return (0.78, 0.80, 0.84)
     desloc = CARGA + np.array([0.0, -LARGURA / 2, 0.0])
-    return [Peca("rotas", n, v, f, cor(n))
-            for n, v, f, _ in ler(E / "integrado_maxeon1540/rotas_instalacoes/layoutA_rotas_reserva.glb", desloc)]
+    saida = []
+    for n, v, f, _ in ler(E / "integrado_maxeon1540/rotas_instalacoes/layoutA_rotas_reserva.glb", desloc):
+        if n.startswith("eletrico__") or "principal_pia" in n:
+            continue                                   # refeitos abaixo, sem colisão
+        if "US5000" in n:
+            v = v + [0, 0, SUBIDA_BANCO]
+        if n.endswith("cooktop_armazenado"):
+            v = v + [-0.06, 0, 0]
+        saida.append(Peca("rotas", n, v, f, cor(n)))
+    # 48 V: da frente do banco (y = 0,433, agora sobre a caixa de roda) pela frente do inversor até a base dele
+    z_banco = 0.72 + SUBIDA_BANCO + 0.30
+    for nome, dx, rgb in (("eletrico__cabo_positivo", 0.0, (0.85, 0.12, 0.12)), ("eletrico__cabo_retorno", 0.03, (0.10, 0.10, 0.10))):
+        x0 = -2.93 + dx
+        x1 = -2.62 + dx
+        saida += tubo([(x0, 0.433, z_banco), (x0, 0.395, z_banco), (x1, 0.395, z_banco), (x1, 0.395, 0.925),
+                       (x1, 0.58, 0.925), (x1, 0.58, 0.96)], RAIO_CABO, nome, rgb)
+    # água para a pia: desce ao lado da bomba (fora do A/C), corre sob o piso e sobe atrás do gabinete até a torneira
+    z_sob = PISO_Z - 0.07
+    saida += tubo([(-2.15, 0.253, 1.03), (-2.15, 0.40, 1.03), (-2.15, 0.40, z_sob), (-0.684, 0.40, z_sob),
+                   (-0.684, -0.86, z_sob), (-0.684, -0.86, 1.575), (-0.684, -0.807, 1.575), (-0.684, -0.807, 1.61)],
+                  RAIO_TUBO, "hidraulica__principal_pia_sob_piso",
+                  (0.15, 0.55, 0.95))
+    return saida
 
 
 def montagem() -> dict[str, list[Peca]]:
