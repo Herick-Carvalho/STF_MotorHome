@@ -2,14 +2,12 @@
 
 Uso (na raiz do repositório):
     .venv/bin/python relatorio/renderizar_cad.py \
-        --cache /home/mhc/motorhome_referencias_tarefas \
         --cfd-vtk /home/mhc/motorhome_referencias_tarefas/cfd-familia-gci-20261116/bg_55x20x10/case/VTK/case_344
 
-Geometrias: exterior L3H2 adaptado (cache aurora-L3H2-01, derivado de razor24/Dogan Ulus,
-MPL-2.0 e CC-BY-4.0), layouts A/B, rotas e teto Maxeon (entregas/), painéis portáteis
-(cache cad-portatil-01), banco de serviços e chapas de fixação (STEP, malhados com gmsh).
-Os layouts e o teto usam um referencial do compartimento de carga; a translação para o
-referencial do veículo foi obtida casando o deck solar com a superfície do CFD.
+A montagem vem de relatorio/montagem_cad.py: exterior L3H2 adaptado (derivado de razor24/Dogan Ulus,
+MPL-2.0 e CC-BY-4.0), layouts A/B detalhados no referencial do projeto (face traseira interna em
+x = -3,35 m, piso em z = 0,68 m), tração e bancos OEM, deck Maxeon na posição do CFD, rotas e painéis
+portáteis. Banco de serviços e chapas de fixação vêm dos STEP (malhados com gmsh).
 Renderização por sombreamento de Lambert em matplotlib (sem dependência de GPU).
 """
 
@@ -23,6 +21,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import montagem_cad as M
 import numpy as np
 import trimesh
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
@@ -30,80 +29,29 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 ROOT = Path(__file__).resolve().parents[1]
 E = ROOT / "entregas"
 OUT = ROOT / "relatorio/figuras"
-# compartimento de carga -> veículo (casamento do deck solar com o STL do CFD)
-CARGA_PARA_VEICULO = np.array([-3.482, 0.0, 0.648])
-TETO_Y = -0.91          # teto/rotas usam y a partir da lateral
 LUZ = np.array([-0.35, -0.55, 0.76]) / np.linalg.norm([-0.35, -0.55, 0.76])
+CORES = M.CORES
 
-CORES = {
-    "energia": (0.20, 0.42, 0.78), "agua": (0.22, 0.70, 0.82), "eletro": (0.93, 0.55, 0.20),
-    "clima": (0.82, 0.25, 0.25), "movel": (0.80, 0.66, 0.47), "banho": (0.92, 0.92, 0.95),
-    "solar": (0.10, 0.16, 0.30), "bolsa": (0.35, 0.38, 0.42), "cama": (0.62, 0.70, 0.55),
-}
 ROTULOS = {
     "geladeira_AC": "geladeira", "cassete": "cassete", "boiler": "boiler", "inversor": "inversor",
     "tanque_limpa": "água limpa", "tanque_cinza": "água cinza", "US5000_2": "banco 48 V",
     "lava_seca": "lava e seca", "hvac": "A/C", "cama_colchao": "cama", "cama_conversivel_colchao": "cama conversível",
-    "portatil_bolsa_2": "painéis portáteis", "base_banho": "banho", "tampo": "bancada",
+    "portatil_bolsa_2": "painéis portáteis", "banho": "banho", "tampo": "bancada",
 }
+ROTULOS_INTERIOR = {"lava_seca", "geladeira_AC", "cassete", "tampo", "cama_colchao", "cama_conversivel_colchao",
+                    "US5000_2", "tanque_limpa", "banho"}
+NOMES_CATEGORIA = {"energia": "energia 48 V", "agua": "água", "eletro": "eletrodomésticos", "clima": "A/C",
+                   "movel": "mobiliário", "banho": "banheiro", "bolsa": "portáteis guardados", "cama": "cama/assentos"}
 
 
-def categoria(nome: str) -> str:
-    for chave, cat in (("US5000", "energia"), ("inversor", "energia"), ("tanque", "agua"), ("boiler", "agua"),
-                       ("bomba", "agua"), ("geladeira", "eletro"), ("cooktop", "eletro"), ("lava", "eletro"),
-                       ("hvac", "clima"), ("MAXEON", "solar"), ("bolsa", "bolsa"), ("cama", "cama"),
-                       ("assento", "cama"), ("cassete", "banho"), ("banho", "banho")):
-        if chave in nome:
-            return cat
-    return "movel"
+def lista(pecas):
+    """Peças da montagem no formato (dono, triângulos, rgb) usado no desenho."""
+    return [(p.dono, p.tri, p.rgb) for p in pecas]
 
 
-MATERIAIS = {"Body": (0.94, 0.95, 0.96), "Body_Glass": (0.16, 0.22, 0.30), "Black_Plastic": (0.20, 0.21, 0.23),
-             "Tire": (0.09, 0.09, 0.10), "Chrome": (0.78, 0.79, 0.82), "Metal": (0.70, 0.71, 0.74)}
-
-
-def cor_material(geom) -> tuple[float, float, float]:
-    v = geom.visual
-    nome = getattr(getattr(v, "material", None), "name", None)
-    if nome in MATERIAIS:
-        return MATERIAIS[nome]
-    try:
-        if hasattr(v, "material"):
-            m = v.material
-            c = getattr(m, "baseColorFactor", None)
-            if c is None:
-                c = m.main_color
-            c = np.asarray(c, dtype=float)[:3]
-            if c.max() > 1.0:
-                c = c / 255.0
-            return tuple(np.clip(c, 0.08, 1.0))
-        c = np.asarray(v.main_color, dtype=float)[:3] / 255.0
-        return tuple(np.clip(c, 0.08, 1.0))
-    except (AttributeError, TypeError, ValueError):
-        return (0.80, 0.82, 0.85)
-
-
-def partes(caminho: Path, deslocamento=(0.0, 0.0, 0.0), cor=None, por_nome=None, filtro=None):
-    """Lista de (nome, triângulos n×3×3, rgb) de um GLB/STL/STEP."""
-    if caminho.suffix.lower() in (".step", ".stp"):
-        caminho = step_para_stl(caminho)
-    cena = trimesh.load(caminho)
-    saida = []
-    if isinstance(cena, trimesh.Trimesh):
-        itens = [("malha", cena, np.eye(4))]
-    else:
-        itens = []
-        for no in cena.graph.nodes_geometry:
-            matriz, nome_geom = cena.graph[no]
-            itens.append((nome_geom, cena.geometry[nome_geom], matriz))
-    for nome, geom, matriz in itens:
-        base = nome.split("_", 1)[1] if nome[:1].isdigit() and "_" in nome else nome
-        if filtro and not filtro(base):
-            continue
-        tri = trimesh.transform_points(geom.vertices, matriz)[geom.faces] + np.asarray(deslocamento)
-        rgb = cor or (por_nome(base) if por_nome else cor_material(geom))
-        saida.append((base, tri, rgb))
-    return saida
+def partes_step(caminho: Path, cor):
+    malha = trimesh.load(step_para_stl(caminho))
+    return [("malha", np.asarray(malha.vertices)[np.asarray(malha.faces)], cor)]
 
 
 def step_para_stl(caminho: Path) -> Path:
@@ -159,82 +107,96 @@ def figura_3d(n=1, tamanho=(9, 5)):
     return fig, axs
 
 
-def salvar(fig, nome):
-    fig.savefig(OUT / nome, dpi=170, bbox_inches="tight", pad_inches=0.05, facecolor="white")
+def salvar(fig, nome, aparar=False, dpi=170):
+    fig.savefig(OUT / nome, dpi=dpi, bbox_inches="tight", pad_inches=0.05, facecolor="white")
     plt.close(fig)
+    if aparar:              # vistas laterais em 3D deixam muito branco dentro do eixo: corta as margens
+        from PIL import Image, ImageChops
+
+        img = Image.open(OUT / nome).convert("RGB")
+        caixa = ImageChops.difference(img, Image.new("RGB", img.size, "white")).getbbox()
+        if caixa:
+            img.crop((max(caixa[0] - 12, 0), max(caixa[1] - 12, 0), caixa[2] + 12, caixa[3] + 12)).save(OUT / nome)
     print("ok", nome)
 
 
-ROTULOS_INTERIOR = {"lava_seca", "geladeira_AC", "cassete", "tampo", "cama_colchao", "cama_conversivel_colchao",
-                    "US5000_2", "tanque_limpa"}
-NOMES_CATEGORIA = {"energia": "energia 48 V", "agua": "água", "eletro": "eletrodomésticos", "clima": "A/C",
-                   "movel": "mobiliário", "banho": "banheiro", "bolsa": "portáteis guardados", "cama": "cama/assentos"}
-
-
-def legenda(ax):
+def legenda(ax, extra=()):
     from matplotlib.patches import Patch
 
-    ax.legend(handles=[Patch(color=CORES[k], label=v) for k, v in NOMES_CATEGORIA.items()], loc="lower left",
-              fontsize=7, frameon=False, ncol=2)
+    itens = [Patch(color=CORES[k], label=v) for k, v in NOMES_CATEGORIA.items()]
+    itens += [Patch(color=c, label=r) for r, c in extra]
+    ax.legend(handles=itens, loc="lower left", fontsize=7, frameon=False, ncol=2)
 
 
-def rotular(ax, lista, deslocamento_z=0.12, so=None):
-    vistos = set()
-    for nome, tri, _ in lista:
-        if nome in ROTULOS and nome not in vistos and (so is None or nome in so):
-            vistos.add(nome)
-            p = tri.reshape(-1, 3)
-            c = p.mean(0)
-            ax.text(c[0], c[1], p[:, 2].max() + deslocamento_z, ROTULOS[nome], fontsize=7, ha="center",
-                    zorder=10, bbox={"fc": "white", "ec": "0.6", "lw": 0.4, "pad": 1.2, "alpha": 0.85})
+def rotular(ax, pecas, deslocamento_z=0.12, so=None):
+    """Um rótulo por equipamento (dono), no topo da caixa que reúne as suas peças."""
+    caixas: dict[str, list] = {}
+    for p in pecas:
+        dono = "banho" if "banho" in p.dono else p.dono
+        if dono in ROTULOS and (so is None or dono in so):
+            caixas.setdefault(dono, []).append(p.v)
+    for dono, vs in caixas.items():
+        v = np.vstack(vs)
+        c = (v.min(0) + v.max(0)) / 2
+        ax.text(c[0], c[1], v[:, 2].max() + deslocamento_z, ROTULOS[dono], fontsize=7, ha="center",
+                zorder=10, bbox={"fc": "white", "ec": "0.6", "lw": 0.4, "pad": 1.2, "alpha": 0.85})
+
+
+def translucido(pecas, a=0.35):
+    return {p.dono: a for p in pecas if "cama" in p.dono or p.dono in ("estrado", "ponte_cama", "travesseiro")}
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--cache", type=Path, default=Path("/home/mhc/motorhome_referencias_tarefas"))
     ap.add_argument("--cfd-vtk", type=Path)
+    ap.add_argument("--so-cfd", action="store_true", help="refaz só as figuras de CFD")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
-    ext_glb = args.cache / "aurora-L3H2-01/aurora_L3H2_proposta_m.glb"
-    carga = CARGA_PARA_VEICULO
-    teto = carga + np.array([0.0, TETO_Y, 0.0])
-    exterior = partes(ext_glb)
-    modulos = partes(E / "desenvolvimento_2026-11-09/teto_maxeon/alternativa1540_plana.glb", teto, cor=CORES["solar"])
-    corte_teto = lambda n: "MAXEON" not in n
-    lay_a = partes(E / "integrado_maxeon1540/integracao/A_fixa.glb", carga, por_nome=lambda n: CORES[categoria(n)], filtro=corte_teto)
-    lay_b = partes(E / "integrado_maxeon1540/integracao/B_conversivel_noite.glb", carga,
-                   por_nome=lambda n: CORES[categoria(n)], filtro=corte_teto)
+    if not args.so_cfd:
+        cad()
+    if args.cfd_vtk:
+        cfd(args.cfd_vtk)
+
+
+def cad() -> None:
+    G = M.montagem()
+    exterior = lista(G["exterior"])
+    sob = lista([p for p in G["teto"] if p.nome in ("trilho", "pe_trilho")])      # desenhados antes dos módulos
+    teto = lista([p for p in G["teto"] if p.nome not in ("trilho", "pe_trilho")])
+    oem = G["cabine"] + G["tracao"] + G["arcos"]
 
     # 1. exterior com teto solar, duas vistas
     fig, axs = figura_3d(2, (12, 4.6))
     for ax, azim, tit in ((axs[0], 32, "dianteira"), (axs[1], -140, "traseira")):
         tri = desenhar(ax, exterior)
-        desenhar(ax, modulos)
+        desenhar(ax, sob)
+        desenhar(ax, teto)
         enquadrar(ax, tri, 16, azim, zoom=1.25)
         ax.set_title(f"Vista {tit}", fontsize=9)
     fig.suptitle("Aurora Solar — exterior com teto de 4 módulos Maxeon (1540 Wp)", fontsize=10)
     salvar(fig, "cad_exterior.png")
 
     # 2. estacionado, portáteis abertos no solo
-    solo = partes(args.cache / "cad-portatil-01/solar_portatil_solo.glb", cor=CORES["solar"])
     fig, axs = figura_3d(1, (9, 5.4))
-    tri = desenhar(axs[0], solo + exterior)
-    desenhar(axs[0], modulos)
+    tri = desenhar(axs[0], lista(G["solo"]) + exterior)
+    desenhar(axs[0], sob)
+    desenhar(axs[0], teto)
     enquadrar(axs[0], tri, 28, -62, zoom=1.3)
     axs[0].set_title("Estacionado: teto 1540 Wp + 4 painéis portáteis de 400 W abertos (≈ 13,9 kWh/dia em 21/06)", fontsize=9)
     salvar(fig, "cad_estacionado.png")
 
-    # 3. interiores em corte (carroceria fantasma)
+    # 3. interiores em corte (carroceria fantasma), com tração sob o piso e bancos da cabine
     fantasma = [(n, t, (0.55, 0.60, 0.68)) for n, t, _ in exterior]
-    for nome_fig, lay, titulo in (("cad_interior_A.png", lay_a, "Layout A (cama fixa) — escolhido"),
-                                  ("cad_interior_B.png", lay_b, "Layout B (cama conversível) — comparador")):
-        fig, axs = figura_3d(1, (10, 5.4))
+    for nome_fig, chave, titulo in (("cad_interior_A.png", "layoutA", "Layout A (cama fixa) — escolhido"),
+                                    ("cad_interior_B.png", "layoutB", "Layout B (cama conversível) — comparador")):
+        lay = G[chave]
+        fig, axs = figura_3d(1, (10, 5.6))
         alfa = {n: 0.045 for n, _, _ in fantasma}
-        alfa.update({n: 0.35 for n, _, _ in lay if "cama" in n or n in ("estrado", "ponte_cama")})
-        tri = desenhar(axs[0], fantasma + lay, alfa=alfa)
-        enquadrar(axs[0], tri, 34, -58, zoom=1.35)
+        alfa.update(translucido(lay))
+        tri = desenhar(axs[0], fantasma + lista(oem) + lista(lay), alfa=alfa)
+        enquadrar(axs[0], tri, 34, -58, zoom=1.2)
         rotular(axs[0], lay, so=ROTULOS_INTERIOR)
-        legenda(axs[0])
+        legenda(axs[0], extra=(("tração OEM (sob o piso)", M.TRACAO["pack_tracao"]),))
         axs[0].set_title(f"{titulo}: interior em corte, carroceria transparente", fontsize=9)
         salvar(fig, nome_fig)
 
@@ -242,51 +204,56 @@ def main() -> None:
     fig = plt.figure(figsize=(10, 6.6), facecolor="white")
     axs = [fig.add_subplot(2, 1, i + 1, projection="3d", computed_zorder=False) for i in range(2)]
     fig.subplots_adjust(left=0, right=1, bottom=0, top=0.95, hspace=0.02)
-    for ax, lay, tit in ((axs[0], lay_a, "Layout A"), (axs[1], lay_b, "Layout B")):
-        alfa = {n: 0.3 for n, _, _ in lay if "cama" in n or n in ("estrado", "ponte_cama")}
-        tri = desenhar(ax, lay, alfa=alfa, aresta=(0.2, 0.2, 0.2, 0.35))
+    for ax, chave, tit in ((axs[0], "layoutA", "Layout A"), (axs[1], "layoutB", "Layout B")):
+        lay = G[chave]
+        tri = desenhar(ax, lista(G["arcos"] + lay), alfa=translucido(lay, 0.3), aresta=(0.2, 0.2, 0.2, 0.35))
         enquadrar(ax, tri, 90, -90, zoom=1.4)
         ax.set_proj_type("ortho")
-        rotular(ax, lay, 0.05, so=ROTULOS_INTERIOR | {"lava_seca", "boiler", "inversor", "hvac", "tanque_cinza"})
+        rotular(ax, lay, 0.05, so=(ROTULOS_INTERIOR - {"banho"}) | {"boiler", "inversor", "hvac", "tanque_cinza"})
         ax.set_title(f"{tit} — planta (frente do veículo à direita, cama transparente)", fontsize=9)
     legenda(axs[1])
     salvar(fig, "cad_plantas.png")
 
     # 5. rotas de cabos e água
-    def cor_rota(n):
-        if "cabo_positivo" in n:
-            return (0.85, 0.12, 0.12)
-        if "cabo_retorno" in n:
-            return (0.10, 0.10, 0.10)
-        if any(k in n for k in ("tanque_bomba", "bomba_boiler", "principal_pia")):
-            return (0.15, 0.55, 0.95)
-        return (0.78, 0.80, 0.84)
-    rotas = partes(E / "integrado_maxeon1540/rotas_instalacoes/layoutA_rotas_reserva.glb",
-                   carga + np.array([0.0, -0.897, 0.0]), por_nome=cor_rota)
-    alfa = {n: (1.0 if any(k in n for k in ("cabo", "tanque_bomba", "bomba_boiler", "principal_pia")) else 0.35)
-            for n, _, _ in rotas}
-    fig, axs = figura_3d(1, (10, 5))
+    rotas = G["rotas"]
     instal = lambda n: any(k in n for k in ("cabo", "tanque_bomba", "bomba_boiler", "principal_pia"))
-    tri = desenhar(axs[0], [x for x in rotas if not instal(x[0])], alfa=alfa)
-    desenhar(axs[0], [x for x in rotas if instal(x[0])])
+    alfa = {p.nome: 0.35 for p in rotas if not instal(p.nome)}
+    fig, axs = figura_3d(1, (10, 5))
+    tri = desenhar(axs[0], [(p.nome, p.tri, p.rgb) for p in rotas if not instal(p.nome)], alfa=alfa)
+    desenhar(axs[0], [(p.nome, p.tri, p.rgb) for p in rotas if instal(p.nome)])
     enquadrar(axs[0], tri, 30, -55, zoom=1.35)
-    rotular(axs[0], rotas)
+    caixas = [M.Peca("rotas", p.nome, p.v, p.f, p.rgb, M.limpar(p.nome)) for p in rotas]
+    rotular(axs[0], caixas)
     axs[0].set_title("Rotas reservadas: cabos 48 V (vermelho +, preto −) e água (azul), layout A", fontsize=9)
     salvar(fig, "cad_rotas.png")
 
     # 6. teto em planta
     fig, axs = figura_3d(1, (10, 3.6))
     tri = desenhar(axs[0], exterior)
-    desenhar(axs[0], modulos)
+    desenhar(axs[0], sob)
+    desenhar(axs[0], teto)
     enquadrar(axs[0], tri, 90, -90, zoom=1.1)
     axs[0].set_proj_type("ortho")
     axs[0].set_title("Teto: 2× SPR-MAX3-380 + 2× SPR-MAX3-390, deck de 4,24 × 1,69 m a 40 mm do teto", fontsize=9)
     salvar(fig, "cad_teto.png")
 
-    # 7. banco de serviços e chapas de fixação (STEP)
-    banco = partes(E / "integrado_maxeon1540/bancos_24_48_cad/A_banco_3modulos.step", cor=CORES["energia"])
-    chapas = partes(E / "desenvolvimento_2026-11-09/fixacoes_redimensionadas/chapas_locais_condicionais.step",
-                    cor=(0.62, 0.64, 0.68))
+    # 7. corte longitudinal: metade esquerda da carroceria, interior A, tração sob o piso e deck sobre trilhos
+    meia = [(n, t[t[:, :, 1].mean(1) > 0.05], c) for n, t, c in exterior if not n.startswith(("Wheel_0_0", "Wheel_1_0"))]
+    meia = [(n, t, c) for n, t, c in meia if len(t)]
+    fig, axs = figura_3d(1, (12, 4.4))
+    lay = G["layoutA"]
+    alfa = {n: 0.55 for n, _, _ in meia}
+    tri = desenhar(axs[0], meia + lista(G["tracao"] + G["cabine"] + G["arcos"] + lay) + sob, alfa=alfa)
+    desenhar(axs[0], teto)
+    enquadrar(axs[0], tri, 6, -90, margem=0.02, zoom=1.05)
+    axs[0].set_proj_type("ortho")
+    rotular(axs[0], lay, 0.06, so={"cama_colchao", "cassete", "geladeira_AC", "lava_seca", "US5000_2", "tampo"})
+    salvar(fig, "cad_corte.png", aparar=True, dpi=400)     # título vai na legenda do relatório
+
+    # 8. banco de serviços e chapas de fixação (STEP)
+    banco = partes_step(E / "integrado_maxeon1540/bancos_24_48_cad/A_banco_3modulos.step", CORES["energia"])
+    chapas = partes_step(E / "desenvolvimento_2026-11-09/fixacoes_redimensionadas/chapas_locais_condicionais.step",
+                         (0.62, 0.64, 0.68))
     fig, axs = figura_3d(2, (12, 4.2))
     tri = desenhar(axs[0], banco, aresta=(0.1, 0.1, 0.15, 0.25))
     enquadrar(axs[0], tri, 25, -60, zoom=1.2)
@@ -295,9 +262,6 @@ def main() -> None:
     enquadrar(axs[1], tri, 30, -50, zoom=1.2)
     axs[1].set_title("18 chapas de fixação dimensionadas (STEP, 33,1 kg)", fontsize=9)
     salvar(fig, "cad_banco_fixacoes.png")
-
-    if args.cfd_vtk:
-        cfd(args.cfd_vtk)
 
 
 def cfd(pasta: Path) -> None:

@@ -31,7 +31,11 @@ Entrega oficial **02/12/2026 06:00** por e-mail aos dois docentes: PDF < 20 MB, 
   `MOTORHOME_SCENARIO=maxeon1540_independente PYTHONPATH=src .venv/bin/python scripts/verificar_cenario_integrado.py` e
   `scripts/verificar_desenvolvimento.py` (após mudar script/saída rastreados: `--registrar`, depois sem). O verificador
   hasheia tudo em `entregas/aero_equipado1540/`: não deixar arquivos ignorados lá.
-- Referencial CAD: layouts/teto (compartimento de carga) → veículo = x − 3,482, z + 0,648; teto/rotas usam y a partir da lateral (y − 0,91 / − 0,897).
+- Referencial CAD: `relatorio/montagem_cad.py` monta tudo no referencial do projeto (traseira interna x = −3,35 m, piso z = 0,68 m,
+  largura centrada; rotas e teto Maxeon exportados com y a partir da lateral). O deck fica na posição do `pvdeck.stl` do CFD
+  (x − 3,482, y − 0,91, z + 0,648 sobre o arquivo do teto). O antigo offset −3,482/0,648 aplicado ao interior o enfiava 13 cm
+  nas portas traseiras (corrigido em 16/11). Achado aberto: banco US5000 invade ~7 cm a caixa de roda traseira esquerda
+  posta sobre o eixo real (dimensões da caixa de roda estimadas).
 
 ## Cuidados
 - mhc-lenovo (15 GB, swap cheio) reiniciou sem shutdown em 16/11 12:31 durante CFD: rodar pesado com

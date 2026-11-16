@@ -389,7 +389,7 @@ balanço fechado; a lavadora consome \SI{68,8}{L} por ciclo.
 
 \begin{figure}[H]
 \centering\includegraphics[width=0.9\linewidth]{cad_interior_A.png}
-\caption{Item 13 — interior do layout A (cama fixa) em corte, com a carroceria transparente; cores por sistema.}
+\caption{Item 13 — interior do layout A (cama fixa) em corte, com a carroceria transparente; cores por sistema. Bancos da cabine, bateria de tração, motor e radiador são os componentes OEM do E-Ducato.}
 \label{fig:interiorA}
 \end{figure}
 
@@ -429,7 +429,13 @@ $U = \SI{0,746}{W/(m^2.K)}$ nas paredes opacas.}
 \itemsec{17}{Geometria 3D e vistas cotadas}
 \resposta{Figura~\ref{fig:vistas}: comprimento \SI{5,981}{m}, largura de carroceria
 \SI{2,079}{m} (\SI{2,491}{m} com espelhos), altura \SI{2,608}{m} no teto e \SI{2,688}{m}
-com o deck solar. A Figura~\ref{fig:layout} mostra o arranjo interno cotado.}
+com o deck solar. A Figura~\ref{fig:layout} mostra o arranjo interno cotado e a
+Figura~\ref{fig:corte}, o corte longitudinal da montagem completa. O interior fica no referencial
+do projeto: face interna traseira em $x=-3{,}35$\,m e piso acabado a \SI{0,68}{m} do solo.}
+\limite{a checagem de colisões da montagem (\texttt{relatorio/montagem\_cad.py}) encontra o banco de
+US5000 avançando cerca de \SI{7}{cm} sobre a caixa de roda traseira esquerda quando ela é posta sobre
+o eixo real; as dimensões da caixa de roda são estimadas e precisam ser conferidas no desenho do
+fabricante.}
 
 \begin{figure}[H]
 \centering\includegraphics[width=\linewidth]{i17_vistas_exterior.png}
@@ -450,6 +456,13 @@ L3H2.}
 \centering\includegraphics[width=0.8\linewidth]{cad_plantas.png}
 \caption{Item 17 — plantas dos layouts A (escolhido) e B (comparador), cama transparente.}
 \label{fig:plantas}
+\end{figure}
+
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{cad_corte.png}
+\caption{Item 17 — corte longitudinal com o lado direito da carroceria removido: bateria de tração e
+motor OEM sob o piso, layout A e deck solar sobre trilhos apoiados no teto abaulado.}
+\label{fig:corte}
 \end{figure}
 
 \begin{figure}[H]

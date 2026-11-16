@@ -4,12 +4,10 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 .venv/bin/python relatorio/gerar_figuras.py > /dev/null
-# Renderizações de CAD/CFD: geometria do cache externo; os campos do CFD só se o VTK existir.
+# Renderizações de CAD (geometria em entregas/) e de CFD (só se o VTK do cache existir).
 CACHE=${CACHE:-/home/mhc/motorhome_referencias_tarefas}
 VTK="$CACHE/cfd-familia-gci-20261116/bg_55x20x10/case/VTK/case_344"
-if [ -d "$CACHE" ]; then
-  .venv/bin/python relatorio/renderizar_cad.py --cache "$CACHE" $( [ -d "$VTK" ] && echo --cfd-vtk "$VTK" ) > /dev/null
-fi
+.venv/bin/python relatorio/renderizar_cad.py $( [ -d "$VTK" ] && echo --cfd-vtk "$VTK" ) > /dev/null
 cd relatorio
 latexmk -pdf -interaction=nonstopmode -halt-on-error relatorio.tex
 latexmk -pdf -interaction=nonstopmode -halt-on-error slides.tex
