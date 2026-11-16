@@ -5,9 +5,10 @@ vídeo de 8–10 min < 50 MB com todos os integrantes, anexo com os códigos.
 
 | Arquivo | Conteúdo |
 |---|---|
-| `relatorio.tex` | Memorial de cálculo: introdução, revisão bibliográfica, itens 1–35, resumo, limitações, referências e anexo de códigos |
-| `slides.tex` | Seminário de 8 min (12 slides, Beamer/metropolis) |
+| `relatorio.tex` | Memorial de cálculo (51 p., 5 MB, 29 figuras incluindo 10 renderizações de CAD/CFD): introdução, revisão bibliográfica, itens 1–35, resumo, limitações, referências e anexo de códigos |
+| `slides.tex` | Seminário de 8 min (15 slides, Beamer/metropolis) |
 | `roteiro_video.md` | Roteiro do vídeo: 7 blocos de ~75 s, um por integrante, com os slides de apoio |
+| `renderizar_cad.py` | Renderizações de CAD (exterior, teto, estacionado, interiores A/B em corte, plantas, rotas, banco e chapas) e de CFD (Cp na superfície, velocidade no plano de simetria) a partir da geometria do projeto e do VTK da malha fina |
 | `gerar_figuras.py` | Gera `figuras/` a partir de `entregas/` e `equipe/` (nenhum número é digitado à mão) |
 | `valores_i19.tex`, `valores_i29.tex` | Macros escritas por `scripts/calcular_gci_aero.py` e `scripts/fechar_i29_velocidade.py --figura` |
 | `compilar.sh` | Figuras + PDFs |

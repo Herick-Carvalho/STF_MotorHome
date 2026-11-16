@@ -173,6 +173,13 @@ do motor ou a relação do redutor), o valor usado é uma hipótese declarada e 
 E-Ducato L3H2 35 (\SI{4250}{kg}), variante SK MY25 505.GG1.2, tração dianteira 100\,\%
 elétrica, teto solar de \SI{1540}{Wp} e quatro painéis portáteis de \SI{400}{Wp}.}
 
+
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{cad_exterior.png}
+\caption{Item 1 — Aurora Solar: Fiat E-Ducato L3H2 convertido, com o teto de quatro módulos Maxeon (1540 Wp). Renderização da geometria do projeto (carroceria derivada de razor24/Dogan Ulus, MPL-2.0 e CC-BY-4.0).}
+\label{fig:exterior}
+\end{figure}
+
 \begin{table}[H]
 \centering\small
 \caption{Dados de base do veículo (ficha Fiat SK de 20/03/2026 \cite{fiatsk}).}
@@ -255,6 +262,13 @@ O banco de serviços foi dimensionado para 24 a 48\,h de habitação sem sol: co
 30\,\%, três módulos dão \SI{10,1}{kWh} utilizáveis e \SI{33}{h} de autonomia com o
 consumo médio de \SI{7,2}{kWh/dia}.
 
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{cad_banco_fixacoes.png}
+\caption{Itens 6 e 15 — banco de serviços com três módulos US5000 no suporte, e as 18 chapas de fixação da conversão (modelos STEP do projeto).}
+\label{fig:banco}
+\end{figure}
+
+
 \itemsec{7}{Fiação elétrica}
 \resposta{\textbf{Alta tensão (\SI{400}{V}):} cabos de fase do fabricante; para os cálculos
 do item 30 adota-se o cabo de referência HUBER+SUHNER RADOX 155 FLR4G
@@ -271,6 +285,13 @@ Em 56 dos casos de falta, a corrente prospectiva passa de \SI{20}{kA}, acima da
 capacidade de interrupção do fusível; para esses casos o projeto prevê limitação pela
 impedância dos cabos ou um fusível de classe superior.
 
+\begin{figure}[H]
+\centering\includegraphics[width=0.85\linewidth]{cad_rotas.png}
+\caption{Item 7 — rotas reservadas de cabos de \SI{48}{V} (positivo em vermelho, retorno em preto) e de água (azul) no layout A; equipamentos em cinza translúcido.}
+\label{fig:rotas}
+\end{figure}
+
+
 \itemsec{8}{Painel fotovoltaico}
 \resposta{\textbf{Teto:} 2$\times$ Maxeon 3 SPR-MAX3-380-COM + 2$\times$ SPR-MAX3-390-COM,
 \textbf{\SI{1540}{Wp}}, silício monocristalino de contato traseiro (IBC), 104 células,
@@ -285,6 +306,19 @@ montados só com o veículo parado. Geração em 21/06: \textbf{\SI{5,86}{kWh}} 
 \centering\includegraphics[width=0.8\linewidth]{i08_geracao_solar.png}
 \caption{Item 8 — potência CC em 21/06 (pvlib, céu claro, modelo térmico de Faiman, 10\,\% de
 perdas). Teto horizontal; portáteis a \ang{45} voltados para o norte, abertos após a parada.}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.75\linewidth]{cad_teto.png}
+\caption{Item 8 — teto em planta: 2 SPR-MAX3-380 + 2 SPR-MAX3-390 num deck de \qtyproduct{4,24 x 1,69}{m}.}
+\label{fig:teto}
+\end{figure}
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.8\linewidth]{cad_estacionado.png}
+\caption{Item 8 — configuração estacionada: teto e quatro painéis portáteis de \SI{400}{W} abertos no solo, voltados para o norte a \ang{45}.}
+\label{fig:estacionado}
 \end{figure}
 
 \itemsec{9}{Controladoras de carga e inversores}
@@ -353,6 +387,13 @@ Climatização & Dometic FreshWell 3000 (item 11) & 21,0 \\
 O uso de água foi simulado em 14 dias com \SI{60}{L/dia}, reabastecimento e descarte diários e
 balanço fechado; a lavadora consome \SI{68,8}{L} por ciclo.
 
+\begin{figure}[H]
+\centering\includegraphics[width=0.9\linewidth]{cad_interior_A.png}
+\caption{Item 13 — interior do layout A (cama fixa) em corte, com a carroceria transparente; cores por sistema.}
+\label{fig:interiorA}
+\end{figure}
+
+
 \itemsec{14}{Suspensão e direção}
 \resposta{Do fabricante, sem alteração: dianteira independente tipo McPherson com barra
 estabilizadora; traseira de eixo rígido com feixe de molas parabólicas; direção de
@@ -370,7 +411,7 @@ verificado.}
 \SI{2,050}{m} de largura (sem espelhos), \SIrange{2,592}{2,612}{m} de altura},
 \SI{4,035}{m} de entre-eixos, compartimento útil de \qtyproduct{3,705 x 1,870 x 1,932}{m}. Fixações
 da conversão em 18 chapas de aço (\SI{33,1}{kg}) dimensionadas por 216 casos de carga
-cada, utilização máxima 0,99.}
+cada, utilização máxima 0,99 (Figura~\ref{fig:banco}).}
 
 \itemsec{16}{Carenagem, portas, aberturas e vidros}
 \resposta{Carenagem de aço do fabricante, mantida. Portas: 2 dianteiras, 1 lateral
@@ -404,6 +445,19 @@ L3H2.}
 \caption{Item 17 — envelopes dos equipamentos internos (layout A, cama fixa), em metros.}
 \label{fig:layout}
 \end{figure}
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.8\linewidth]{cad_plantas.png}
+\caption{Item 17 — plantas dos layouts A (escolhido) e B (comparador), cama transparente.}
+\label{fig:plantas}
+\end{figure}
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.85\linewidth]{cad_interior_B.png}
+\caption{Item 17 — layout B (cama conversível), interior em corte.}
+\label{fig:interiorB}
+\end{figure}
+
 
 \itemsec{18}{Massa do veículo montado com passageiros}
 \resposta{\textbf{\SI{3976,5}{kg}} com duas pessoas (\SI{80}{kg} cada), \SI{60}{kg} de bagagem e
@@ -468,6 +522,19 @@ a área de referência com espelhos.
 \centering\includegraphics[width=0.8\linewidth]{i19_gci.png}
 \caption{Item 19 — $C_d$ nas três malhas, faixa de incerteza e valor usado nos modelos de energia.}
 \end{figure}}{}
+
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{cfd_cp.png}
+\caption{Item 19 — coeficiente de pressão na carroceria e no deck solar (malha fina, \SI{80}{km/h}): estagnação no para-brisa e na grade, sucção na borda do teto e no início do deck.}
+\label{fig:cp}
+\end{figure}
+
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{cfd_plano.png}
+\caption{Item 19 — velocidade no plano de simetria: aceleração sobre a borda do teto, escoamento no vão de \SI{40}{mm} sob o deck e esteira com velocidade abaixo de $0{,}6\,U_\infty$ por mais de \SI{6}{m} atrás do veículo.}
+\label{fig:cfdplano}
+\end{figure}
+
 \limite{geometria equivalente (não CAD do fabricante), sem rodas girando e $y^+$ médio de
 cerca de 260 na carroceria, adequado a funções de parede; não há validação experimental.}
 
