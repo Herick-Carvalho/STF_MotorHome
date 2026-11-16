@@ -1,0 +1,56 @@
+# I24 — custo total de material em R$ com impostos de importação.
+# Preços de referência públicos (lista ou varejo), acessados em 2026-11-16.
+# Não são cotações formais; linhas "estimativa" são faixas declaradas, não preços.
+revision: i24-brl-1.0
+accessed: '2026-11-16'
+cambio:
+  usd_brl: {value: 5.5146, date: '2026-11-09', source: 'PTAX fechamento BCB, via https://brasil61.com/n/dolar-hoje-fecha-em-leve-alta-a-r-5-51-apos-oscilar-entre-queda-e-valorizacao-bras2617447'}
+  eur_brl: {value: 6.1748, date: '2026-11-09', source: 'Taxa de referência BCE, via https://www.numerando.com.br/cambio/euro/2026'}
+tributos_importacao:
+  # Cálculo: CIF = FOB*(1+frete_seguro); II = aII*CIF; IPI = aIPI*(CIF+II);
+  # PIS = 2,1%*CIF; COFINS = 9,65%*CIF; ICMS "por dentro" = aICMS/(1-aICMS)*(CIF+II+IPI+PIS+COFINS).
+  frete_seguro: [0.03, 0.05, 0.08]
+  pis: 0.021
+  cofins: 0.0965
+  icms: 0.18
+  veiculo:
+    ii: 0.35
+    ii_source: 'Alíquota de 35% para elétricos de carga desde 07/2024; https://canaltech.com.br/carros/imposto-de-35-ja-entrou-em-vigor-carros-eletricos-vao-ficar-mais-caros/'
+    ipi: [0.0, 0.05, 0.10]
+  componentes:
+    ii: [0.14, 0.20, 0.35]
+    ipi: [0.0, 0.05, 0.10]
+    note: 'II e IPI dos componentes variam por NCM; faixa declarada, nominal 20%/5%.'
+itens:
+  - {id: veiculo, descricao: 'Fiat E-Ducato L3H2 SK MY25 505.GG1.2 (sem IVA)', qtd: 1, preco: 50990, moeda: EUR, importado: veiculo,
+     fonte: 'https://www.fiat.sk/content/dam/fiat2023/sk/cenniky/2026/03/e_Ducato_pricelist_dodavka_200326.pdf'}
+  - {id: modulos_maxeon, descricao: 'Maxeon 3 SPR-MAX3-380/390-COM (preço do 400 W como referência)', qtd: 4, preco: 346, moeda: EUR, importado: componentes,
+     fonte: 'https://www.europe-solarstore.com/sunpower-spr-max3-400.html'}
+  - {id: bateria_servicos, descricao: 'Pylontech US5000 4,8 kWh', qtd: 3, preco: 908, moeda: EUR, importado: componentes,
+     fonte: 'https://suministrosdelsol.com/pt/baterias-pylontech/1505-bateria-litio-pylontech-us5000-48kwh-48v.html'}
+  - {id: inversor_servicos, descricao: 'Victron MultiPlus-II GX 48/5000/70-50', qtd: 1, preco: 1093, moeda: USD, importado: componentes,
+     fonte: 'https://latam.victronenergy.com/wp-content/uploads/2026/04/Pricelist-Victron-2026-Q2-USD-C.pdf'}
+  - {id: mppt_teto, descricao: 'Victron SmartSolar MPPT 250/60-Tr (teto)', qtd: 1, preco: 465, moeda: USD, importado: componentes,
+     fonte: 'https://latam.victronenergy.com/wp-content/uploads/2026/04/Pricelist-Victron-2026-Q2-USD-C.pdf'}
+  - {id: mppt_portateis, descricao: 'Victron SmartSolar MPPT 150/60-Tr (portáteis)', qtd: 1, preco: 393, moeda: USD, importado: componentes,
+     fonte: 'https://latam.victronenergy.com/wp-content/uploads/2026/04/Pricelist-Victron-2026-Q2-USD-C.pdf'}
+  - {id: hvac, descricao: 'Dometic FreshWell 3000 (sob banco)', qtd: 1, preco: 2244.14, moeda: EUR, importado: componentes,
+     fonte: 'https://carclimat.pl/en_US/p/DOMETIC-FRESHWELL-3000-230V-under-bench-air-conditioner-for-motorhomes-caravans/815'}
+  - {id: cassete, descricao: 'Thetford Porta Potti 365', qtd: 1, preco: 124.49, moeda: EUR, importado: componentes,
+     fonte: 'https://aio.lv/en/product--thetford-5024586--11414029.md'}
+  - {id: pv_portatil, descricao: 'EcoFlow 400 W portátil', qtd: 4, preco: 5712.27, moeda: BRL, importado: false,
+     fonte: 'https://www.kabum.com.br/produto/1040075/painel-solar-portatil-de-400w-ecoflow'}
+  - {id: geladeira, descricao: 'Frigobar Midea 93 L MRC10B2 220 V', qtd: 1, preco: 1499.00, moeda: BRL, importado: false,
+     fonte: 'https://www.magazineluiza.com.br/busca/frigobar+midea+93l+branco/'}
+  - {id: lava_seca, descricao: 'Lava e seca LG VC2 (equivalente ao CV9011WC4A; menor preço do CV9013WC4)', qtd: 1, preco: 5883.90, moeda: BRL, importado: false,
+     fonte: 'https://www.buscape.com.br/lavadora-roupas/lava-e-seca-lg-13kg-vc2-cv9013wc4'}
+  - {id: cooktop, descricao: 'Cooktop de indução Electrolux IE3TP 220 V', qtd: 1, preco: 439.00, moeda: BRL, importado: false,
+     fonte: 'histórico do projeto, preço de 2026-10-26 (bom_componentes.csv)'}
+  - {id: isolamento, descricao: 'Isolamento termoacústico (estimativa)', qtd: 1, faixa: [2500, 4500, 6500], moeda: BRL, importado: false,
+     fonte: 'https://www.correiobraziliense.com.br/cbradar/quanto-custa-transformar-uma-van-em-uma-casa-movel-confortavel-para-viajar-e-morar-sozinho/'}
+  - {id: marcenaria, descricao: 'Marcenaria, cama, bancada, assentos (estimativa)', qtd: 1, faixa: [4000, 8000, 15000], moeda: BRL, importado: false,
+     fonte: 'https://www.correiobraziliense.com.br/cbradar/quanto-custa-transformar-uma-van-em-uma-casa-movel-confortavel-para-viajar-e-morar-sozinho/'}
+  - {id: eletrica_hidraulica, descricao: 'Cabos, fusíveis, conversor 48/12 V, boiler, bomba, tanques, tubos (estimativa)', qtd: 1, faixa: [8000, 12000, 18000], moeda: BRL, importado: false,
+     fonte: 'estimativa do grupo; componentes listados em bom_componentes.csv sem preço publicado'}
+  - {id: montagem, descricao: 'Montagem, suportes e acabamento (estimativa)', qtd: 1, faixa: [15000, 25000, 40000], moeda: BRL, importado: false,
+     fonte: 'https://www.correiobraziliense.com.br/cbradar/quanto-custa-transformar-uma-van-em-uma-casa-movel-confortavel-para-viajar-e-morar-sozinho/'}

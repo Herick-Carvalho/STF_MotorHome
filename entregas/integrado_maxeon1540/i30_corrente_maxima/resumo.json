@@ -1,0 +1,42 @@
+{
+  "script": "scripts/fechar_i30_corrente_maxima.py",
+  "method": "I_fase = P_mec/(eta_m*sqrt(3)*V_LL*FP), V_LL,rms = V_dc/sqrt(2) (limite SVPWM linear); contorno: convecção natural Churchill–Chu + radiação, ar parado 25 °C; campo r–θ do solver do projeto",
+  "motor_peak_mechanical_w": 205000,
+  "nominal": {
+    "eta": 0.95,
+    "pf": 0.9,
+    "vdc": 400,
+    "emis": 0.9,
+    "corrente_fase_rms_a": 489.4204651759762,
+    "1x120_temperatura_max_c": 85.36524030642079,
+    "1x150_temperatura_max_c": 69.44632992675656,
+    "2x120_temperatura_max_c": 41.21838111254431,
+    "1x120_h_total_w_m2k": 15.110095598596839,
+    "1x150_h_total_w_m2k": 13.914881194133638,
+    "2x120_h_total_w_m2k": 11.838800583263378
+  },
+  "faixa_corrente_fase_rms_a": [
+    454.101462534411,
+    611.552060979846
+  ],
+  "faixa_temperatura_max_c": {
+    "1x120": [
+      77.15874458571182,
+      123.6128276712094
+    ],
+    "1x150": [
+      63.50675133610275,
+      96.87110180243474
+    ],
+    "2x120": [
+      39.11660381523268,
+      50.715874954125525
+    ]
+  },
+  "max_abs_residuo_w_m": 2.317351288638747e-08,
+  "limits": [
+    "Regime permanente na potência de pico é conservador: o pico de 205 kW é de curta duração.",
+    "Sem perdas AC/PWM (efeito pelicular), feixe de cabos, conduíte ou condução axial.",
+    "Fator de potência, eficiência e tensão do barramento são varridos; mapa OEM não publicado."
+  ]
+}

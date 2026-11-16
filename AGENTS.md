@@ -1,3 +1,7 @@
+# Fechamento e entregáveis (16/11/2026)
+
+O usuário pediu para terminar os 35 itens e o trabalho todo: relatório, slides e roteiro do vídeo estão em `relatorio/` (ver `relatorio/README.md`) e as lacunas fechadas em `docs/FECHAMENTO_35_ITENS.md`. A instrução antiga de não preparar relatório/slides está revogada. Comece por `docs/HANDOFF_PROXIMA_SESSAO.md`.
+
 # Integração1540Wp reproduzida
 
 Ocenário `maxeon1540_independente` está definido no únicoYAML canônico e foi executado pela cadeia `scripts/executar_cenario_integrado.py`. Resultados em `entregas/integrado_maxeon1540/`,CFDequipado em `entregas/aero_equipado1540/`;base1350Wp preservada como comparação,não misturar entradas/saídas. Usar plano atualizado e revisão35;executores históricos não atualizam o projeto ativo. Aprovação humana e interfaceDC continuam não demonstradas. Não reiniciar pesquisa repetitiva nem preparar relatório/slides agora.

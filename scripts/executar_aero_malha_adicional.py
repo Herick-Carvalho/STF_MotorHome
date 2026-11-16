@@ -41,6 +41,15 @@ def main() -> None:
                         help="test three prism layers on ground, body, and PV deck walls")
     parser.add_argument("--ground-grading-factor", type=float, default=1.0,
                         help="block-mesh expansion from the ground plane toward the roof")
+    parser.add_argument("--divisoes", type=int, nargs=3, default=[66, 24, 12],
+                        metavar=("NX", "NY", "NZ"),
+                        help="background block divisions; other settings unchanged (GCI family)")
+    parser.add_argument("--max-celulas", type=int, default=650000,
+                        help="snappy maxLocalCells/maxGlobalCells; raise it so refinement is never truncated")
+    parser.add_argument("--mesh-timeout", type=int, default=None,
+                        help="snappyHexMesh timeout in s (default: configured value, min 600)")
+    parser.add_argument("--solver-timeout", type=int, default=None,
+                        help="simpleFoam timeout in s (default: configured value, min 600)")
     parser.add_argument("--mesh-only", action="store_true",
                         help="stop after checkMesh so the parallel solver can be run separately")
     args = parser.parse_args()
@@ -65,7 +74,7 @@ def main() -> None:
     block_text = block.read_text()
     if "(55 20 10)" not in block_text:
         raise ValueError("Base block mesh differs from the source audited for this refinement")
-    block.write_text(block_text.replace("(55 20 10)", "(66 24 12)"))
+    block.write_text(block_text.replace("(55 20 10)", "({} {} {})".format(*args.divisoes)))
     if args.ground_grading_factor != 1.0:
         block_text = block.read_text()
         if "simpleGrading (1 1 1)" not in block_text:
@@ -77,7 +86,7 @@ def main() -> None:
     snappy = case / "system/snappyHexMeshDict"
     text = snappy.read_text()
     text = text.replace("maxLocalCells 400000; maxGlobalCells 400000;",
-                        "maxLocalCells 650000; maxGlobalCells 650000;")
+                        f"maxLocalCells {args.max_celulas}; maxGlobalCells {args.max_celulas};")
     text = text.replace("level (4 5);", "level (5 6);")
     if "level (5 6);" not in text:
         raise ValueError("Could not set the intended finer surface refinement")
@@ -107,16 +116,17 @@ def main() -> None:
     ).replace("endTime 1200;", f"endTime {verification['max_iterations']};"))
 
     env = ambiente(CACHE / "software/openfoam2412-local/usr/lib/openfoam/openfoam2412")
-    mesh_timeout = max(verification["mesh_timeout_s"], 600)
-    solver_timeout = max(verification["solver_timeout_s"], 600)
+    mesh_timeout = args.mesh_timeout or max(verification["mesh_timeout_s"], 600)
+    solver_timeout = args.solver_timeout or max(verification["solver_timeout_s"], 600)
     result: dict[str, object] = {
         "source_case": SOURCE_NAME,
         "source_snappy_sha256": hashlib.sha256((source / "system/snappyHexMeshDict").read_bytes()).hexdigest(),
-        "block_mesh_dimensions": [66, 24, 12],
+        "block_mesh_dimensions": list(args.divisoes),
         "surface_levels_body_deck": [5, 6],
         "wall_layers_requested": 3 if args.add_wall_layers else 0,
         "wall_layer_patches": ["ground", "aurora", "pvdeck"] if args.add_wall_layers else [],
         "ground_grading_factor": args.ground_grading_factor,
+        "max_cells_cap": args.max_celulas,
         "mesh_only": args.mesh_only,
         "wake_refinement_changed": False,
         "grid_independence_claimed": False,

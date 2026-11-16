@@ -1,0 +1,100 @@
+{
+  "script": "scripts/calcular_gci_aero.py",
+  "method": "oscilatoria: U = (max - min)/2 (Stern et al., 2001); Richardson não aplicável",
+  "casos": [
+    {
+      "caso": "bg_55x20x10",
+      "celulas": 750513,
+      "h_m": 0.24472489750864715,
+      "cd": 0.62153633,
+      "convergiu": true,
+      "cd_span_50it": 0.00013896747105946673,
+      "yplus": {
+        "ground": [
+          56.837505,
+          12075.168,
+          1448.847
+        ],
+        "pvdeck": [
+          98.628069,
+          792.90965,
+          315.7921
+        ],
+        "aurora": [
+          5.8778259,
+          1321.6807,
+          304.60484
+        ]
+      }
+    },
+    {
+      "caso": "bg_44x16x8",
+      "celulas": 522986,
+      "h_m": 0.2760371537131785,
+      "cd": 0.63375142,
+      "convergiu": true,
+      "cd_span_50it": 0.00017903570055156006,
+      "yplus": {
+        "ground": [
+          59.47928,
+          16258.743,
+          1351.182
+        ],
+        "pvdeck": [
+          147.5644,
+          3271.9122,
+          409.97806
+        ],
+        "aurora": [
+          16.087422,
+          1655.0373,
+          355.85441
+        ]
+      }
+    },
+    {
+      "caso": "bg_33x12x6",
+      "celulas": 291219,
+      "h_m": 0.33552456834137095,
+      "cd": 0.62197102,
+      "convergiu": true,
+      "cd_span_50it": 2.7525603598553343e-05,
+      "yplus": {
+        "ground": [
+          74.99085,
+          17098.13,
+          1511.137
+        ],
+        "pvdeck": [
+          167.39751,
+          746.07379,
+          458.27424
+        ],
+        "aurora": [
+          19.054276,
+          2623.0117,
+          434.92132
+        ]
+      }
+    }
+  ],
+  "r21": 1.1279487968870228,
+  "r32": 1.2155051007735138,
+  "razao_convergencia_R": -1.0368994261655016,
+  "oscilatoria": true,
+  "cd_fina": 0.62153633,
+  "incerteza_absoluta_cd": 0.006107544999999992,
+  "incerteza_relativa_cd": 0.00982652936796147,
+  "cda_m2": 3.0006781886675857,
+  "cd_modelos_energia": 0.62487678,
+  "diferenca_relativa_modelos_energia": 0.005374504817763509,
+  "diagnostico_celik": {
+    "ordem_aparente_p": 0.4434349612783509,
+    "cd_extrapolado": 0.3987992796066645,
+    "gci_fina_21": 0.4479566190308914,
+    "gci_media_32": 0.25704160922262514,
+    "valido": false,
+    "nota": "r21 < 1,3 e convergência oscilatória: valores apenas diagnósticos"
+  },
+  "physical_validation": false
+}

@@ -1,0 +1,7 @@
+# Malhas e campos são reproduzíveis por scripts/executar_aero_malha_adicional.py;
+# versionar só dicionários, logs, histórico de forças e resumos.
+*/case/constant/polyMesh/
+*/case/constant/triSurface/
+*/case/0/
+*/case/[1-9]*/
+*/case/processor*/

@@ -1,0 +1,859 @@
+% Memorial de cálculo — Aurora Solar (motorhome elétrico solar)
+% Compilar: latexmk -pdf relatorio.tex   (requer texlive-lang-portuguese e texlive-science)
+% Figuras: .venv/bin/python relatorio/gerar_figuras.py (na raiz do repositório)
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{lmodern,microtype}
+\usepackage[a4paper,margin=2.3cm]{geometry}
+\usepackage{amsmath,booktabs,graphicx,float,caption,longtable,array,xcolor,tabularx}
+\usepackage[output-decimal-marker={,},group-separator={.},per-mode=symbol]{siunitx}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{figuras/}}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.35em}
+\lstset{basicstyle=\ttfamily\scriptsize,breaklines=true,columns=fullflexible,frame=single,
+  showstringspaces=false,inputencoding=utf8,extendedchars=true,
+  literate={á}{{\'a}}1 {à}{{\`a}}1 {ã}{{\~a}}1 {â}{{\^a}}1 {é}{{\'e}}1 {ê}{{\^e}}1 {í}{{\'i}}1
+           {ó}{{\'o}}1 {õ}{{\~o}}1 {ô}{{\^o}}1 {ú}{{\'u}}1 {ç}{{\c c}}1 {Á}{{\'A}}1 {É}{{\'E}}1
+           {Ç}{{\c C}}1 {Ã}{{\~A}}1 {°}{{$^\circ$}}1 {–}{{--}}1 {—}{{---}}1 {×}{{$\times$}}1
+           {²}{{$^2$}}1 {³}{{$^3$}}1 {η}{{$\eta$}}1 {θ}{{$\theta$}}1 {±}{{$\pm$}}1 {≤}{{$\le$}}1 {≥}{{$\ge$}}1 {º}{{\textsuperscript{o}}}1 {ª}{{\textsuperscript{a}}}1 {≈}{{$\approx$}}1}
+\newcommand{\itemsec}[2]{\subsection*{#1)~#2}\addcontentsline{toc}{subsection}{#1) #2}}
+\newcommand{\resposta}[1]{\par\noindent\colorbox{blue!6}{\parbox{\dimexpr\linewidth-2\fboxsep}{\textbf{Resposta.} #1}}\par}
+\newcommand{\limite}[1]{\par\noindent{\small\textit{Limitação:} #1}\par}
+\newcommand{\cod}[1]{\texttt{\small #1}}
+
+\input{valores_pendentes}
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+{\large Universidade de São Paulo — Escola de Engenharia de São Carlos\par}
+{\large Projeto de Modelagem e Simulação de Sistemas Térmicos e Fluídicos — 2026\par}
+\vspace{3cm}
+{\Huge\bfseries Aurora Solar\par}
+\vspace{0.6cm}
+{\Large Motorhome elétrico solar para duas pessoas\par}
+\vspace{0.4cm}
+{\large Memorial de cálculo, especificações e simulações dos 35 itens\par}
+\vspace{2.5cm}
+\begin{tabular}{lll}
+\toprule
+& Frente & Itens \\
+\midrule
+P1 \hspace{1em}\rule{4cm}{0.4pt} & Estrutura, freios, massa e custo & 1, 2, 3, 14, 15, 18, 24, 33 \\
+P2 \hspace{1em}\rule{4cm}{0.4pt} & Bateria, elétrica e cabos & 6, 7, 9, 23, 30 \\
+P3 \hspace{1em}\rule{4cm}{0.4pt} & Carroceria, CAD e CFD & 16, 17, 19 \\
+P4 \hspace{1em}\rule{4cm}{0.4pt} & Motor, transmissão e dinâmica & 4, 5, 20, 21, 22, 28 \\
+P5 \hspace{1em}\rule{4cm}{0.4pt} & Solar, autonomia e otimização & 8, 25, 26, 27, 29 \\
+P6 \hspace{1em}\rule{4cm}{0.4pt} & Interior e conforto térmico & 11, 13, 31, 32 \\
+P7 \hspace{1em}\rule{4cm}{0.4pt} & Arrefecimento e térmica da bateria & 10, 12, 34, 35 \\
+\bottomrule
+\end{tabular}
+\vfill
+{São Carlos, 2 de dezembro de 2026\par}
+\end{titlepage}
+
+\tableofcontents
+\clearpage
+
+%======================================================================
+\section{Introdução e objetivos}
+
+O objetivo do trabalho é projetar, especificar, avaliar e simular um motorhome elétrico
+solar que transporte no mínimo duas pessoas, buscando autonomia energética. As condições
+de cálculo são as do enunciado: céu limpo em 21 de junho, em São Carlos--SP
+(\ang{-21.980}, \ang{-47.884}, \SI{859}{m}, estação INMET A711), ambiente a \SI{25}{\celsius},
+umidade relativa de 50\,\% e vento nulo, salvo quando um item define outra condição.
+
+O projeto, chamado \textbf{Aurora Solar}, converte um furgão elétrico de série, o
+\textbf{Fiat E-Ducato L3H2 de \SI{4250}{kg}} (variante SK MY25 505.GG1.2), em motorhome para duas
+pessoas. A escolha mantém intactos o trem de força, a bateria de tração e os sistemas de
+segurança homologados pelo fabricante, e concentra o projeto no que é próprio de um
+motorhome solar: geração fotovoltaica no teto e em painéis portáteis, um banco de
+baterias de serviço independente, o interior habitável e o conforto térmico.
+
+A decisão de arquitetura mais importante é que a energia solar \emph{não} é injetada
+diretamente na bateria de alta tensão (\SI{400}{V}) do veículo, porque o fabricante não
+autoriza essa modificação. A energia solar alimenta o banco de serviços de \SI{48}{V} e,
+nos itens que pedem energia solar para tração (25, 27 e 29), é transferida à bateria de
+tração por uma interface de recarga CC externa pelo conector CCS2, tratada como hipótese de
+estudo com eficiência de 90\,\% e potência mínima de \SI{1}{kW}. Essa hipótese está
+explícita em todos os resultados que dependem dela.
+
+Cada resultado deste memorial é reproduzível pelo código do repositório do grupo; o
+Anexo~\ref{sec:anexo} lista os scripts, comandos e o endereço do repositório. Os
+parâmetros vêm de um arquivo único (\cod{config/parametros\_globais.yaml}), em que cada valor
+tem fonte, unidade e situação (dado do fabricante, decisão do grupo ou hipótese).
+
+%======================================================================
+\section{Revisão bibliográfica das tecnologias}
+
+\paragraph{Motorhomes e furgões elétricos.} Os exemplos de referência do enunciado
+mostram duas rotas. O Arrow One \cite{arrow} é um furgão elétrico de projeto nacional, e o
+Vegini Evolve \cite{vegini} é um motorhome 100\,\% elétrico construído sobre esse
+chassi; ambos usam a bateria de tração também para a habitação. O Stella Vita, da Solar
+Team Eindhoven \cite{stellavita}, é um protótipo de alta eficiência projetado do zero, com
+carroceria aerodinâmica, teto solar que se expande com o veículo parado e massa reduzida, e
+percorreu cerca de \SI{3000}{km} pela Europa em 2021. O Aurora Solar fica entre os dois
+extremos: parte de um veículo comercial homologado e adiciona geração solar em escala
+compatível com o teto de um furgão.
+
+\paragraph{Trem de força elétrico.} Furgões elétricos de série usam motor síncrono de
+ímãs permanentes (PMSM) com redutor de relação fixa e bateria de íons de lítio. O
+E-Ducato MY24/25 tem bateria LFP de \SI{110}{kWh} brutos e motor de \SI{205}{kW} de pico
+\cite{fiatsk,fiatuk}. A química LFP troca densidade de energia por vida cíclica longa,
+estabilidade térmica e ausência de cobalto. PMSMs automotivos atingem eficiência de pico
+de 94 a 97\,\%; o rendimento cai em torque baixo, onde as perdas no ferro e mecânicas
+dominam \cite{hendershot}.
+
+\paragraph{Energia solar em veículos.} Módulos de células de contato traseiro (IBC), como
+os Maxeon 3, chegam a 22--23\,\% de eficiência de módulo e degradam pouco com
+temperatura (\SI{-0,27}{\percent/K}) \cite{maxeon}. Em um furgão, a área de teto limita a
+potência instalada a 1,5--2\,kWp; em dias curtos de inverno essa potência gera cerca de
+\SI{6}{kWh/dia}, uma fração pequena do consumo de tração. Painéis portáteis abertos com o
+veículo parado aumentam a área de captação sem alterar a aerodinâmica. A irradiância é
+calculada com o modelo de céu claro e de transposição do \texttt{pvlib} \cite{pvlib} e o
+modelo térmico de módulo de Faiman.
+
+\paragraph{Eletrônica de potência e armazenamento de serviço.} Controladores MPPT
+modernos convertem a potência dos módulos com eficiência acima de 98\,\%, e inversores
+bidirecionais de \SI{48}{V} atingem 94--96\,\% \cite{victron}. Bancos de serviço LFP de
+\SI{48}{V} modulares (por exemplo, Pylontech US5000) são comuns em motorhomes e
+instalações residenciais \cite{pylontech}.
+
+\paragraph{Aerodinâmica e térmica.} O arrasto de furgões de teto alto fica tipicamente
+entre $C_d = 0{,}30$ e $0{,}45$ para a carroceria limpa \cite{hucho}; acessórios de teto,
+espelhos e rodas expostas elevam esse valor. A simulação RANS com modelo $k$--$\omega$ SST e funções de
+parede é a ferramenta padrão para estimativa de $C_d$, desde que acompanhada de estudo
+de malha \cite{celik}. Os problemas térmicos (cabos, freios, bateria, cabine e
+radiador) seguem a condução de Fourier, a convecção de Newton e balanços de energia
+transientes, como na apostila da disciplina \cite{apostila,incropera}.
+
+%======================================================================
+\section{Condições de projeto e método}
+
+\begin{table}[H]
+\centering\small
+\caption{Condições e parâmetros principais do cenário integrado \cod{maxeon1540\_independente}.}
+\label{tab:cenario}
+\begin{tabular}{lll}
+\toprule
+Grandeza & Valor & Origem \\
+\midrule
+Local, data & São Carlos, 21/06, céu limpo & enunciado; INMET A711 \\
+Ambiente & \SI{25}{\celsius}, UR 50\,\%, vento \SI{0}{m/s}, $\rho = \SI{1,10}{kg/m^3}$ & enunciado; altitude \\
+Massa montada típica & \SI{3976,5}{kg} (2 pessoas, bagagem, \SI{100}{L} de água) & item 18 \\
+Área frontal & \SI{4,828}{m^2} & item 19 (geometria do CFD) \\
+$C_d$ nos modelos de energia & 0,625 (faixa 0,581--0,720) & item 19 \\
+$C_r$ & 0,012 (faixa 0,008--0,016) & item 20 \\
+Rendimento bateria--roda & 0,90 (faixa 0,85--0,95) & hipótese \\
+Auxiliares de tração & \SI{700}{W} em movimento & hipótese \\
+Bateria de tração & \SI{98}{kWh} úteis, \SI{400}{V}, LFP & Fiat SK \cite{fiatsk} \\
+Banco de serviços & \SI{14,4}{kWh}, \SI{48}{V}, LFP & item 6 \\
+Teto FV / portáteis & \SI{1540}{Wp} / \SI{1600}{Wp} (só parado) & item 8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Os resultados são classificados como \emph{dado de fabricante}, \emph{calculado} ou
+\emph{simulado}. Quando uma entrada não é publicada (por exemplo, o mapa de eficiência
+do motor ou a relação do redutor), o valor usado é uma hipótese declarada e o resultado
+é acompanhado de uma faixa de sensibilidade. As simulações multidimensionais (itens 19,
+30, 31, 33 e 35) incluem verificação de malha ou de passo de tempo.
+
+%======================================================================
+\section{Especificações (itens 1 a 16)}
+
+\itemsec{1}{Nome do carro}
+\resposta{\textbf{Aurora Solar} — motorhome elétrico solar para duas pessoas sobre Fiat
+E-Ducato L3H2 35 (\SI{4250}{kg}), variante SK MY25 505.GG1.2, tração dianteira 100\,\%
+elétrica, teto solar de \SI{1540}{Wp} e quatro painéis portáteis de \SI{400}{Wp}.}
+
+\begin{table}[H]
+\centering\small
+\caption{Dados de base do veículo (ficha Fiat SK de 20/03/2026 \cite{fiatsk}).}
+\begin{tabular}{ll}
+\toprule
+Comprimento / largura sem espelhos / altura & \SI{5,998}{m} / \SI{2,050}{m} / \SIrange{2,592}{2,612}{m} \\
+Entre-eixos / bitolas diant. e tras. & \SI{4,035}{m} / \SI{1,81}{m} e \SI{1,79}{m} \\
+Massa em ordem de marcha / PBT & \SI{2790}{kg} / \SI{4250}{kg} \\
+Motor & PMSM 8 polos, \SI{205}{kW} e \SI{410}{N.m} de pico \\
+Bateria & LFP, \SI{110}{kWh} brutos, \SI{98}{kWh} úteis, \SI{400}{V}, 15 módulos \\
+Recarga & CCS2, até \SI{150}{kW} CC \\
+Velocidade máxima & \SI{90}{km/h} (limitador de série na versão de \SI{4250}{kg}) \\
+Preço (sem IVA) & EUR 50.990 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\itemsec{2}{Pneus e rodas}
+\resposta{Pneus \textbf{225/75 R16C 121R} (referência Continental VanContact A/S, artigo
+04514690000 \cite{conti}), radiais de borracha com cintas de aço, diâmetro \SI{0,744}{m},
+\SI{16,9}{kg} cada, carga máxima \SI{1449}{kg} por pneu; rodas de aço 6,5J$\times$16 (aro
+admissível 6--7\,in). \textbf{Pressão a frio: \SI{4,5}{bar} na dianteira e
+\SI{5,0}{bar} na traseira} (\SI{450}{kPa}/\SI{500}{kPa}), valores do manual do Fiat Ducato
+para essa medida \cite{ducatomanual}. Quantidade: 4 + estepe.}
+
+Na massa montada cada eixo recebe cerca de \SI{1988}{kg}, ou \SI{994}{kg} por pneu, 69\,\% da
+capacidade de carga do pneu. O raio de rolamento
+efetivo, de \SI{0,361}{m} (709 revoluções por milha), é usado nos itens 4, 28 e 33.
+\limite{a placa de pressões da variante elétrica SK não foi obtida; os valores são os do
+Ducato com a mesma medida de pneu.}
+
+\itemsec{3}{Sistema de freios}
+\resposta{Freios hidráulicos a disco nas quatro rodas com ABS/ESC do fabricante e
+frenagem regenerativa pelo motor. Disco dianteiro ventilado de \SI{300}{mm}$\times$\SI{32}{mm}
+(referência Brembo 09.D018.11 \cite{brembo}), ferro fundido cinzento
+($\rho = \SI{7100}{kg/m^3}$, $c_p = \SI{500}{J/(kg.K)}$, $k = \SI{51}{W/(m.K)}$ \cite{topczewska}),
+massa útil de \SI{5,1}{kg} por disco no modelo; repartição de frenagem 70/30 (diant./tras.).}
+
+Com a transferência de carga numa desaceleração de \SI{4}{m/s^2}, a carga dinâmica é
+\SI{2362}{kg} na dianteira e \SI{1614}{kg} na traseira, o que exige coeficiente de
+atrito pneu--solo de 0,48 na dianteira e 0,30 na traseira, abaixo da aderência de pista
+seca. A simulação térmica está no item 33.
+
+\itemsec{4}{Motor}
+\resposta{Motor síncrono de ímãs permanentes, 8 polos, \textbf{\SI{205}{kW} e \SI{410}{N.m}
+de pico}. Torque constante até a rotação de base de \SI{4775}{rpm} e potência
+constante acima dela (Figura~\ref{fig:motor}). Eficiência máxima de 95,5\,\% no modelo
+de perdas; a \SI{90}{km/h} o motor gira a \SI{6608}{rpm} com redução 10:1.}
+
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{i04_motor.png}
+\caption{Item 4 — envelope de torque e potência a partir dos picos do fabricante, e mapa de
+eficiência de um modelo de perdas calibrado com $\eta = 0{,}95$ no ponto de canto.}
+\label{fig:motor}
+\end{figure}
+
+O mapa de eficiência usa perdas no cobre proporcionais a $T^2$, no ferro a
+$\omega^{1,5}$, mecânicas a $\omega$ e uma parcela constante, divididas em
+60/25/10/5\,\% no ponto de canto (\SI{410}{N.m}, \SI{500}{rad/s}):
+\begin{equation}
+\eta(T,\omega) = \frac{T\omega}{T\omega + k_c T^2 + k_i \omega^{1,5} + k_m \omega + P_0}.
+\end{equation}
+\limite{o fabricante publica só os picos; a forma do mapa é modelo, não medição.}
+
+\itemsec{5}{Transmissão}
+\resposta{Redutor de \textbf{relação fixa} com diferencial integrado e tração dianteira (sem
+câmbio), do fabricante \cite{fiatde}. Relação nominal de estudo $i = 10$ (faixa 8--12) e
+rendimento 0,97 (faixa 0,95--0,99). Na potência de pico, a perda no redutor fica entre
+\SI{2,1}{kW} e \SI{10,3}{kW}.}
+\limite{a relação numérica do E-Ducato não é publicada; o valor 10 reproduz a rotação típica de
+PMSMs automotivos no limite de \SI{90}{km/h}.}
+
+\itemsec{6}{Baterias}
+\resposta{\textbf{Tração:} LFP do fabricante, \SI{110}{kWh} brutos / \SI{98}{kWh} úteis,
+\SI{400}{V}, 15 módulos, refrigeração líquida. \textbf{Serviços:} 3$\times$ Pylontech US5000
+(LFP, \SI{48}{V}, \SI{100}{Ah}, \SI{4,8}{kWh} cada, \SI{39,7}{kg},
+\qtyproduct{442 x 420 x 161}{mm}), total \SI{14,4}{kWh} e \SI{119,1}{kg}, sob a cama.}
+
+O banco de serviços foi dimensionado para 24 a 48\,h de habitação sem sol: com reserva de
+30\,\%, três módulos dão \SI{10,1}{kWh} utilizáveis e \SI{33}{h} de autonomia com o
+consumo médio de \SI{7,2}{kWh/dia}.
+
+\itemsec{7}{Fiação elétrica}
+\resposta{\textbf{Alta tensão (\SI{400}{V}):} cabos de fase do fabricante; para os cálculos
+do item 30 adota-se o cabo de referência HUBER+SUHNER RADOX 155 FLR4G
+\qtyproduct{1 x 120}{mm^2} (cobre estanhado, isolamento poliolefínico reticulado, \SI{1500}{V} CC,
+\SI{1,147}{kg/m}, \SIrange{-40}{150}{\celsius}) \cite{radox}. \textbf{Serviços
+(\SI{48}{V}):} cabos de cobre de \SIlist{70;95;120}{mm^2} entre banco, inversor e
+barramento, fusível principal Littelfuse JLLN 200\,A (\SI{20}{kA} de interrupção) e
+JLLN 80\,A no MPPT; \textbf{\SI{220}{V}/\SI{60}{Hz}} para as cargas CA e
+\SI{12}{V} por conversor CC-CC para iluminação e bombas.}
+
+A triagem elétrica avaliou 324 casos de queda de tensão e 144 casos de curto-circuito no
+barramento de \SI{48}{V}. As correntes de operação ficam entre \SI{10}{A} e \SI{103}{A}.
+Em 56 dos casos de falta, a corrente prospectiva passa de \SI{20}{kA}, acima da
+capacidade de interrupção do fusível; para esses casos o projeto prevê limitação pela
+impedância dos cabos ou um fusível de classe superior.
+
+\itemsec{8}{Painel fotovoltaico}
+\resposta{\textbf{Teto:} 2$\times$ Maxeon 3 SPR-MAX3-380-COM + 2$\times$ SPR-MAX3-390-COM,
+\textbf{\SI{1540}{Wp}}, silício monocristalino de contato traseiro (IBC), 104 células,
+\qtyproduct{1,690 x 1,046}{m} e \SI{19}{kg} cada, eficiência de módulo \SI{21,5}{\percent} e
+\SI{22,1}{\percent}, área de \SI{7,07}{m^2} num deck de \qtyproduct{4,24 x 1,69}{m} \cite{maxeon}.
+\textbf{Portáteis:} 4$\times$ EcoFlow \SI{400}{W} dobráveis (monocristalinos,
+\qtyproduct{1,068 x 2,390}{m} abertos, \SI{21}{kg} com bolsa), \SI{1600}{Wp} e \SI{10,2}{m^2},
+montados só com o veículo parado. Geração em 21/06: \textbf{\SI{5,86}{kWh}} no teto e
+\textbf{\SI{8,04}{kWh}} nos portáteis, total \SI{13,9}{kWh/dia}.}
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.8\linewidth]{i08_geracao_solar.png}
+\caption{Item 8 — potência CC em 21/06 (pvlib, céu claro, modelo térmico de Faiman, 10\,\% de
+perdas). Teto horizontal; portáteis a \ang{45} voltados para o norte, abertos após a parada.}
+\end{figure}
+
+\itemsec{9}{Controladoras de carga e inversores}
+\resposta{MPPT Victron SmartSolar \textbf{250/60-Tr} para o teto e \textbf{150/60-Tr} para os
+portáteis (eficiência máxima 99\,\%, \SI{3}{kg} cada); inversor-carregador Victron
+\textbf{MultiPlus-II GX 48/5000/70-50}, \SI{4000}{W} contínuos a \SI{25}{\celsius},
+eficiência máxima 96\,\%, consumo em vazio \SI{18}{W}, \SI{31}{kg}, ajustado para
+\SI{220}{V}/\SI{60}{Hz} \cite{victron}. Nos balanços de energia usam-se rendimentos
+agregados de 0,90 para inversor e conversão de baixa tensão e 0,90 para a interface CC
+de recarga da tração.}
+
+Os rastreadores são independentes, porque a curva I--V dos portáteis em 2S2P é diferente da
+do teto; a comparação de 72 casos de MPPT compartilhado mostrou perdas por descasamento.
+
+\itemsec{10}{Sistema de resfriamento dos componentes elétricos}
+\resposta{Circuito líquido do fabricante com água-glicol 50/50 para motor e inversor, radiador
+frontal com ventilador e bomba elétrica (referência Bosch PCE2-XL 039202453G, \SI{12}{V},
+\SI{0,46}{kg} \cite{bosch}); bateria de tração com placa fria no mesmo princípio. Na
+potência de pico de \SI{205}{kW}, o calor a rejeitar do conjunto motor+inversor é
+\SI{10,9}{kW}, \SI{22,9}{kW} e \SI{36,3}{kW} para rendimentos combinados de 95, 90 e
+85\,\%. O dimensionamento do radiador e da bomba está no item 35.}
+
+\itemsec{11}{Ar-condicionado, aquecimento e ventilação}
+\resposta{\textbf{Dometic FreshWell 3000} sob o banco (\SI{2700}{W} de frio, até \SI{3000}{W} de
+aquecimento, \SI{220}{V}, \SI{21}{kg}, \qtyproduct{626 x 400 x 286}{mm})
+\cite{dometic}; \textbf{ventilação natural} prioritária por claraboia de teto e
+janelas, com ventilação mecânica de reserva.}
+
+O balanço de CO$_2$ em regime permanente (mistura perfeita) pede \SI{62}{m^3/h} de ar
+externo para manter \SI{1000}{ppm} com duas pessoas; com \SI{30}{m^3/h}, o equilíbrio
+seria \SI{1620}{ppm}. Os 648 casos de sensibilidade mostram ventiladores de
+\SIrange{0,2}{17,5}{W}. A potência térmica necessária está no item 32.
+
+\itemsec{12}{Sistema de lubrificação}
+\resposta{Por ser elétrico, o veículo \textbf{não tem óleo de motor}. A lubrificação se limita
+a: óleo de engrenagens do redutor/diferencial (banho, enchimento vitalício do fabricante),
+graxa dos rolamentos de roda e das juntas homocinéticas, graxa das articulações da
+suspensão e direção, e óleo do compressor do ar-condicionado (circuito selado). A perda
+no redutor na potência de pico (\SIrange{2,1}{10,3}{kW}) aquece o óleo e é rejeitada por
+convecção na carcaça.}
+\limite{grau, volume e intervalo do óleo do redutor não são publicados para a variante.}
+
+\itemsec{13}{Materiais internos}
+\begin{table}[H]
+\centering\small
+\caption{Item 13 — equipamentos e materiais internos (layout A, cama fixa).}
+\begin{tabularx}{\linewidth}{lXr}
+\toprule
+Sistema & Marca/modelo e características & Massa [kg] \\
+\midrule
+Assentos & 2 bancos dianteiros do fabricante, giratórios para a área social & OEM \\
+Cama & cama fixa de casal com estrado e colchão de espuma & 50,1 \\
+Mobiliário & piso, tampo e divisórias em compensado naval & 82,2 \\
+Isolamento & Armaflex AF de \SI{32}{mm} + revestimento de \SI{6}{mm} & 151,5 \\
+Toalete/chuveiro & cassete Thetford Porta Potti 365 (\SI{21}{L}); box com chuveiro & 4,0 + 21,2 \\
+Água & tanques \SI{100}{L} limpa / \SI{70}{L} cinza, bomba Shurflo 4008 \SI{12}{V}, boiler Quick B3 \SI{15}{L} \SI{500}{W} & 17,3 + água \\
+Fogão & cooktop de indução Electrolux IE3TP, 1 zona, \SI{220}{V} & 2,3 \\
+Geladeira & frigobar Midea MRC10B2, \SI{93}{L}, compressor, \SI{14,1}{kWh/mês} & 20,8 \\
+Lavadora/secadora & LG lava e seca VC2, \SI{220}{V} & 73,0 \\
+Eletrônicos & iluminação LED, carregadores USB, monitor de bateria (GX) & em cabos \\
+Climatização & Dometic FreshWell 3000 (item 11) & 21,0 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+O uso de água foi simulado em 14 dias com \SI{60}{L/dia}, reabastecimento e descarte diários e
+balanço fechado; a lavadora consome \SI{68,8}{L} por ciclo.
+
+\itemsec{14}{Suspensão e direção}
+\resposta{Do fabricante, sem alteração: dianteira independente tipo McPherson com barra
+estabilizadora; traseira de eixo rígido com feixe de molas parabólicas; direção de
+pinhão e cremalheira com assistência elétrica.}
+
+Os 162 casos de massa e centro de gravidade (Tabela~\ref{tab:massa}) dão carga por eixo de
+\SIrange{1737}{2243}{kg} na dianteira e \SIrange{1698}{2294}{kg} na traseira, e índice
+geométrico de capotamento $a_y = t/(2h_{CG}) \approx \SI{0,96}{g}$ no caso nominal, acima
+de valores típicos de furgões carregados.
+\limite{os limites por eixo da variante não são publicados; o PBT de \SI{4250}{kg} é o limite
+verificado.}
+
+\itemsec{15}{Chassi}
+\resposta{Carroceria monobloco de aço do furgão L3H2: \textbf{\SI{5,998}{m} de comprimento,
+\SI{2,050}{m} de largura (sem espelhos), \SIrange{2,592}{2,612}{m} de altura},
+\SI{4,035}{m} de entre-eixos, compartimento útil de \qtyproduct{3,705 x 1,870 x 1,932}{m}. Fixações
+da conversão em 18 chapas de aço (\SI{33,1}{kg}) dimensionadas por 216 casos de carga
+cada, utilização máxima 0,99.}
+
+\itemsec{16}{Carenagem, portas, aberturas e vidros}
+\resposta{Carenagem de aço do fabricante, mantida. Portas: 2 dianteiras, 1 lateral
+corrediça (entrada da habitação) e traseiras duplas com abertura de \ang{270}.
+Aberturas novas: claraboia de ventilação no teto, uma janela lateral com vidro duplo de
+acrílico e tela, e passagens seladas para cabos e água. Vidros: para-brisa laminado e
+janelas da cabine do fabricante, com película solar. O deck solar de alumínio fica
+\SI{40}{mm} acima do teto. Isolamento Armaflex de \SI{32}{mm}
+($k = \SI{0,038}{W/(m.K)}$ a \SI{40}{\celsius}) \cite{armaflex}, com
+$U = \SI{0,746}{W/(m^2.K)}$ nas paredes opacas.}
+
+%======================================================================
+\section{Parâmetros calculados (itens 17 a 24)}
+
+\itemsec{17}{Geometria 3D e vistas cotadas}
+\resposta{Figura~\ref{fig:vistas}: comprimento \SI{5,981}{m}, largura de carroceria
+\SI{2,079}{m} (\SI{2,491}{m} com espelhos), altura \SI{2,608}{m} no teto e \SI{2,688}{m}
+com o deck solar. A Figura~\ref{fig:layout} mostra o arranjo interno cotado.}
+
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{i17_vistas_exterior.png}
+\caption{Item 17 — vistas lateral, superior e frontal e perspectiva da geometria externa usada
+no CFD. A carroceria deriva da malha Fiat Ducato 2014 do OpenX Assets
+(razor24, 2019; Dogan Ulus, 2025; MPL-2.0 e CC-BY-4.0) \cite{openx}, ajustada às cotas
+L3H2.}
+\label{fig:vistas}
+\end{figure}
+
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{i17_layout_interno.png}
+\caption{Item 17 — envelopes dos equipamentos internos (layout A, cama fixa), em metros.}
+\label{fig:layout}
+\end{figure}
+
+\itemsec{18}{Massa do veículo montado com passageiros}
+\resposta{\textbf{\SI{3976,5}{kg}} com duas pessoas (\SI{80}{kg} cada), \SI{60}{kg} de bagagem e
+\SI{100}{L} de água; CG em $x = \SI{2,018}{m}$, $y = \SI{0,002}{m}$, $z = \SI{0,931}{m}$; cargas
+de \SI{1988}{kg} por eixo; margem de \SI{273,5}{kg} até o PBT.}
+
+\begin{table}[H]
+\centering\small
+\caption{Item 18 — composição da massa montada (layout A).}
+\label{tab:massa}
+\begin{tabular}{lr}
+\toprule
+Parcela & Massa [kg] \\
+\midrule
+Veículo em ordem de marcha (fabricante, inclui bateria de tração) & 2790,0 \\
+Sistema solar (4 Maxeon, 4 portáteis com bolsa, suportes) & 175,0 \\
+Banco de serviços (3 US5000) e inversor & 150,1 \\
+Interior, isolamento, revestimentos, banheiro e mobiliário & 325,0 \\
+Equipamentos (geladeira, lavadora, A/C, boiler, bomba, cooktop, cassete) & 130,4 \\
+Cabos, proteções, suportes, tanques e hidráulica & 61,0 \\
+Água (\SI{85}{L} no tanque + \SI{15}{L} no boiler) & 100,0 \\
+Ocupantes, bagagem e alimentos & 245,0 \\
+\midrule
+\textbf{Total} & \textbf{3976,5} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\itemsec{19}{Coeficiente de arrasto e área frontal (CFD)}
+\resposta{Área frontal \textbf{$A = \SI{4,828}{m^2}$}. \textbf{$C_d = \CdValor$} na malha mais fina
+(RANS $k$--$\omega$ SST, família de três malhas), incerteza numérica de \CdGCI; $C_dA = \CdA$.}
+
+O domínio mede \qtyproduct{55 x 20 x 10}{m}, com a frente do veículo a \SI{17,5}{m} da entrada e
+\SI{31,5}{m} de esteira até a saída. Na entrada
+e no solo impõe-se \SI{22,2}{m/s} (\SI{80}{km/h}, solo móvel, vento nulo), saída com
+gradiente nulo, laterais e topo com simetria, e funções de parede na carroceria e no
+deck solar. A malha é hexaédrica com refinamento por superfície (níveis 5--6) e uma
+região de esteira. O fator de forma do deck solar está incluído.
+
+O estudo anterior do grupo variou a graduação vertical das células e obteve $C_d$ de 0,60 a
+0,70; a revisão deste memorial mostrou que essas malhas atingiram o limite de
+\num{650000} células do \texttt{snappyHexMesh} antes de completar o refinamento, de modo
+que não formavam uma família. A família final usa apenas o tamanho da malha de fundo como
+variável, sem limite de células (Tabela abaixo). A malha intermediária fica 2\,\% acima das
+outras duas, que concordam entre si em 0,1\,\%: a convergência é \emph{oscilatória}
+($R = \varepsilon_{21}/\varepsilon_{32} < 0$). Nesse caso a extrapolação de Richardson e o GCI
+de Celik et al.\ \cite{celik} não se aplicam (aplicados formalmente, dariam ordem aparente
+$p = 0{,}44$ e um valor extrapolado sem sentido físico); a incerteza é limitada pela metade da
+amplitude da oscilação, $U = (C_{d,max} - C_{d,min})/2$ \cite{stern}. As razões de refino
+efetivas (1,13 e 1,22) ficaram abaixo do valor 1,3 recomendado porque a contagem de células é
+dominada pelo refinamento de superfície, que acompanha a malha de fundo de forma
+sublinear.
+\GCItabela
+
+O $C_d = 0{,}625$ usado nos modelos de energia (itens 21--29) difere do resultado em
+0,5\,\%, dentro da incerteza numérica, e a faixa de sensibilidade 0,581--0,720 desses
+modelos cobre o intervalo. O valor é alto para um furgão (0,30--0,45 na carroceria limpa
+\cite{hucho}) porque inclui o deck solar a \SI{40}{mm} do teto, espelhos, rodas paradas e
+a área de referência com espelhos.
+
+\IfFileExists{figuras/i19_gci.png}{\begin{figure}[H]
+\centering\includegraphics[width=0.8\linewidth]{i19_gci.png}
+\caption{Item 19 — $C_d$ nas três malhas, faixa de incerteza e valor usado nos modelos de energia.}
+\end{figure}}{}
+\limite{geometria equivalente (não CAD do fabricante), sem rodas girando e $y^+$ médio de
+cerca de 260 na carroceria, adequado a funções de parede; não há validação experimental.}
+
+\itemsec{20}{Coeficiente de resistência ao rolamento}
+\resposta{\textbf{$C_r = 0{,}012$} (faixa de sensibilidade 0,008--0,016), valor típico de pneus
+comerciais C2 de van com pressão de catálogo em asfalto \cite{gillespie,euLabel}. Na massa
+montada, a força de rolamento é $F_r = C_r m g = \SI{468}{N}$.}
+
+\itemsec{21}{Forças resistivas versus velocidade}
+\begin{equation}
+F_a = \tfrac{1}{2}\rho C_d A v^2, \qquad F_r = C_r m g .
+\end{equation}
+\resposta{Figura~\ref{fig:forcas}: a \SI{40}{km/h}, $F_a = \SI{205}{N}$ e $F_r = \SI{468}{N}$
+(total \SI{673}{N}); a \SI{80}{km/h}, $F_a = \SI{819}{N}$ e total \SI{1287}{N}. O arrasto
+supera o rolamento a partir de cerca de \SI{60}{km/h}.}
+\begin{figure}[H]
+\centering\includegraphics[width=0.75\linewidth]{i21_forcas_resistivas.png}
+\caption{Item 21 — forças resistivas no plano, sem vento ($C_d = 0{,}625$, $C_r = 0{,}012$,
+$m = \SI{3976,5}{kg}$).}
+\label{fig:forcas}
+\end{figure}
+A sensibilidade de 8100 casos (massa, velocidade, rampa de $\pm6\,\%$, vento de
+$\pm\SI{10}{m/s}$, $C_r$, $C_d$ e densidade) tem demanda máxima de \SI{140}{kW} nas rodas
+(\SI{90}{km/h}, rampa de 6\,\%, vento contrário de \SI{10}{m/s}, \SI{4250}{kg}), abaixo do
+pico do motor.
+
+\itemsec{22}{Potência resistiva e de tração versus velocidade}
+\resposta{Figura~\ref{fig:potencias}: potência de tração nas rodas de \SI{7,5}{kW} a
+\SI{40}{km/h} e \SI{28,6}{kW} a \SI{80}{km/h}; na bateria, com rendimento 0,90 e
+\SI{700}{W} de auxiliares, \SI{9,0}{kW} e \SI{32,5}{kW}.}
+\begin{figure}[H]
+\centering\includegraphics[width=0.75\linewidth]{i22_potencias.png}
+\caption{Item 22 — potências resistivas e de tração em regime permanente.}
+\label{fig:potencias}
+\end{figure}
+
+\itemsec{23}{Capacidade das baterias}
+\resposta{\textbf{\SI{112,4}{kWh} úteis a bordo}: \SI{98}{kWh} na tração (\SI{110}{kWh}
+brutos) e \SI{14,4}{kWh} nominais no banco de serviços (\SI{13,7}{kWh} com 95\,\% de
+profundidade de descarga).}
+
+\itemsec{24}{Custo total de material}
+\resposta{\textbf{R\$ 789 mil} (faixa R\$ 721--882 mil), incluindo impostos de importação:
+veículo importado R\$ 619 mil e conversão R\$ 170 mil; os tributos de importação somam
+R\$ 324 mil.}
+
+Os preços de lista ou varejo têm fonte e data de acesso (16/11/2026) no arquivo
+\cod{config/custos\_brl\_i24.yaml}. Câmbio: USD R\$ 5,5146 (PTAX 09/11/2026) e EUR
+R\$ 6,1748. Os itens importados passam pela cascata
+\begin{align}
+\text{CIF} &= \text{FOB}(1+f), \quad II = a_{II}\,\text{CIF}, \quad IPI = a_{IPI}(\text{CIF}+II),\\
+\text{ICMS} &= \frac{a_{ICMS}}{1-a_{ICMS}}\,(\text{CIF}+II+IPI+0{,}021\,\text{CIF}+0{,}0965\,\text{CIF}),
+\end{align}
+com frete e seguro $f = 5\,\%$, imposto de importação de 35\,\% para veículo elétrico de carga
+\cite{ii35}, 20\,\% para componentes (faixa 14--35\,\%), IPI de 5\,\% (0--10\,\%),
+PIS/COFINS-Importação de 2,1\,\% e 9,65\,\% e ICMS de 18\,\% (SP). Produtos comprados no
+Brasil (painéis portáteis, eletrodomésticos) entram pelo preço de varejo, já com impostos.
+\begin{figure}[H]
+\centering\includegraphics[width=0.7\linewidth]{i24_custo.png}
+\caption{Item 24 — custo nominal por grupo, com impostos.}
+\end{figure}
+\limite{preços de referência, não cotações; isolamento, marcenaria, elétrica/hidráulica e
+montagem são faixas de estimativa.}
+
+%======================================================================
+\section{Simulações (itens 25 a 35)}
+
+\itemsec{25}{Autonomia somente com a energia solar do dia}
+\resposta{Com toda a energia solar do dia (\SI{14,4}{kWh} gerados, \SI{13,0}{kWh} entregues à
+tração pela interface CC): \textbf{\SI{57,6}{km} a \SI{40}{km/h}} e \textbf{\SI{31,9}{km} a
+\SI{80}{km/h}}. A curva completa (Figura~\ref{fig:i25}) tem máximo de \SI{66}{km} perto de
+\SI{20}{km/h}.}
+
+O despacho é um problema de programação linear inteira mista (MILP) por janela de tempo:
+o crédito solar acumula-se enquanto o veículo está parado com os portáteis abertos e é
+consumido na condução,
+\begin{equation}
+E(t+\Delta t) = E(t) + \eta_{CC}\,P_{FV}(t)\,\Delta t - P_{bat}(v)\,\Delta t,\qquad E(0)=0,\; E\ge 0,
+\end{equation}
+e o horário de partida é otimizado. Foram resolvidos 630 casos (passos de 30, 15 e 5 min,
+potência mínima da interface de 0, 1 e \SI{3}{kW}). Com mínimo de \SI{1}{kW}, as distâncias
+caem para \SI{51,5}{km} e \SI{28,6}{km}.
+\begin{figure}[H]
+\centering\includegraphics[width=0.75\linewidth]{i25_autonomia_solar.png}
+\caption{Item 25 — distância percorrida com a energia solar de 21/06 em função da velocidade.}
+\label{fig:i25}
+\end{figure}
+\limite{depende da interface CC de recarga externa, hipotética; sem ela, a energia solar não
+chega à bateria de tração e a autonomia solar de tração é nula.}
+
+\itemsec{26}{Consumo em km/kWh a 40 e 80 km/h}
+\resposta{\textbf{\SI{4,44}{km/kWh} a \SI{40}{km/h}} (\SI{0,225}{kWh/km}) e
+\textbf{\SI{2,46}{km/kWh} a \SI{80}{km/h}} (\SI{0,406}{kWh/km}), medidos na bateria, com
+rendimento bateria--roda de 0,90 e \SI{700}{W} de auxiliares.}
+\begin{equation}
+e(v) = \frac{1}{\eta}\left(C_r m g + \tfrac12\rho C_d A v^2\right) + \frac{P_{aux}}{v}.
+\end{equation}
+Na faixa de sensibilidade ($C_d$, $C_r$, $\eta$, $\rho$), o consumo varia de
+\SIrange{3,25}{5,78}{km/kWh} a \SI{40}{km/h} e \SIrange{1,97}{3,03}{km/kWh} a \SI{80}{km/h}.
+\begin{figure}[H]
+\centering\includegraphics[width=0.7\linewidth]{i26_km_kwh.png}
+\caption{Item 26 — consumo específico em função da velocidade.}
+\end{figure}
+
+\itemsec{27}{Autonomia máxima diária com SOC final de 30\,\%}
+\resposta{Partindo de SOC 100\,\% e terminando em 30\,\% (\SI{68,6}{kWh}), a autonomia máxima
+em 24\,h é \textbf{\SI{351,5}{km}}, a \textbf{velocidade constante de \SI{20,7}{km/h}} durante
+\SI{17,0}{h}, com potência de \SI{3,0}{kW} nas rodas e \SI{4,04}{kW} na bateria
+(Figura~\ref{fig:i27}). Limitando a condução a 8\,h, são \SI{309,5}{km} a \SI{38,7}{km/h} e
+\SI{8,58}{kW} na bateria.}
+
+Como $e(v)$ é convexa, pela desigualdade de Jensen a velocidade constante minimiza a
+energia para uma distância e duração dadas; o ótimo irrestrito está no mínimo de $e(v)$,
+$v^{*} = (P_{aux}\,\eta/(\rho C_d A))^{1/3}$, ajustado ao limite de 24\,h. Com SOC inicial
+de 80\,\%, a autonomia máxima é de \SI{251}{km}.
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{i27_perfil.png}
+\caption{Item 27 — velocidade, potência instantânea e SOC ao longo do dia.}
+\label{fig:i27}
+\end{figure}
+\limite{percurso plano a velocidade constante; não inclui reposição solar durante o dia
+(que exigiria a interface CC).}
+
+\itemsec{28}{Velocidade máxima e aceleração de 0 a 100 km/h}
+\resposta{\textbf{Velocidade máxima de \SI{90}{km/h}}, imposta pelo limitador eletrônico de série
+na versão de \SI{4250}{kg} \cite{fiatsk}; sem o limitador, a potência permitiria mais.
+\textbf{0--100 km/h não é alcançável} com o limitador ativo. O tempo de 0 a \SI{90}{km/h}
+é de \textbf{\SI{10,6}{s}} no caso nominal (faixa de \SIrange{9,2}{14,2}{s} em 36 casos de
+relação, rendimento e aderência).}
+\begin{equation}
+m_{ef}\,\frac{dv}{dt} = \min\!\left(\frac{T_{mot}(\omega)\, i\, \eta_t}{r},\; \mu\, m g\, \frac{b}{L}\right) - F_a(v) - F_r .
+\end{equation}
+\begin{figure}[H]
+\centering\includegraphics[width=0.72\linewidth]{i28_aceleracao.png}
+\caption{Item 28 — aceleração no plano, sem vento ($i = 10$, $\eta_t = 0{,}97$, $\mu = 0{,}8$).}
+\end{figure}
+
+\itemsec{29}{Velocidade ótima para 7000 km (Belém--Chuí)}
+\resposta{\IbResposta}
+
+\IbTexto
+
+\limite{depende da interface CC hipotética de \SI{1}{kW} mínimo; o dia de 21/06 é repetido
+ao longo da viagem, e o percurso é plano.}
+
+\itemsec{30}{Temperatura nos fios de alimentação do motor}
+\resposta{Na potência máxima de \SI{205}{kW}, a corrente de fase é de
+\textbf{\SI{489}{A} RMS} e a temperatura máxima no condutor de \SI{120}{mm^2} é de
+\textbf{\SI{85}{\celsius}} em regime permanente (faixa de \SIrange{77}{124}{\celsius}), abaixo do
+limite de \SI{150}{\celsius} do isolamento.}
+
+A corrente de fase sai do limite de modulação linear SVPWM,
+$V_{LL,rms} = V_{CC}/\sqrt{2} = \SI{283}{V}$:
+\begin{equation}
+I_{fase} = \frac{P_{mec}}{\eta_m \sqrt{3}\, V_{LL}\, FP} = \frac{205\,000}{0{,}95\cdot\sqrt3\cdot 283\cdot 0{,}90} = \SI{489}{A}.
+\end{equation}
+O campo de temperatura $T(r,\theta)$ é resolvido por volumes finitos em dois materiais
+(feixe de cobre e isolamento), com geração Joule dependente da temperatura,
+$q''' = I^2 R_{20}[1+\alpha(T-20)]/A$, e contorno de convecção natural (Churchill--Chu)
+mais radiação ($\varepsilon = 0{,}9$) em ar parado a \SI{25}{\celsius}, iterado sobre a
+temperatura da superfície ($h \approx \SI{15}{W/(m^2.K)}$). A sensibilidade (rendimento
+0,92--0,97, fator de potência 0,85--0,95, tensão \SIrange{350}{400}{V}, emissividade) dá
+\SIrange{454}{612}{A}. Cabos de \SI{150}{mm^2} ficam em \SIrange{64}{97}{\celsius}.
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{i30_cabos.png}
+\caption{Item 30 — perfil radial e campo $T(r,\theta)$ no cabo de fase na potência de pico.}
+\end{figure}
+\limite{regime permanente na potência de pico é conservador; não inclui efeito pelicular e
+agrupamento de cabos.}
+
+\itemsec{31}{Cabine estacionada ao meio-dia, fechada}
+\resposta{\textbf{\SI{49,1}{\celsius}} ao meio-dia no modelo de zona única (pico de
+\SI{49,6}{\celsius} às 14h07); a simulação CFD 3D transiente da cabine, na malha mais fina, dá média de
+\textbf{\SI{50,3}{\celsius}} e máxima de \SI{53,1}{\celsius}, com estratificação vertical de
+cerca de \SI{3}{K}.}
+\begin{equation}
+C\,\frac{dT}{dt} = \sum_j \left(U_j A_j \frac{\alpha I_j(t)}{h_o} + g A_{v,j} I_j(t)\right) - UA\,(T - T_a),
+\end{equation}
+com $UA = \SI{65,4}{W/K}$, $C = \SI{200}{kJ/K}$ e início às 6h a \SI{25}{\celsius}. A
+irradiância por face vem do pvlib. Três malhas (\num{2400}, \num{8100} e \num{19200} células) dão médias de 50,55, 50,43 e
+\SI{50,32}{\celsius} (variação de \SI{0,23}{K}); reduzir o passo de \SI{0,1}{s} para
+\SI{0,05}{s} muda a média em \SI{0,001}{K}.
+\begin{figure}[H]
+\centering\includegraphics[width=0.85\linewidth]{i31_cabine.png}
+\caption{Item 31 — campos de temperatura e velocidade na cabine fechada (convecção natural).}
+\end{figure}
+
+\itemsec{32}{Potência de ar-condicionado (33 °C externo, 25 °C interno)}
+\resposta{\textbf{\SI{2,65}{kW} de frio} com duas pessoas e \SI{30}{m^3/h} de renovação
+(\SI{2,52}{kW} com uma pessoa); com a vazão de \SI{62}{m^3/h} exigida pelo CO$_2$,
+\textbf{\SI{2,87}{kW}}. O consumo elétrico, com COP 2,5, fica entre \SI{1,06}{kW} e
+\SI{1,15}{kW}.}
+
+O balanço em regime permanente soma condução pela envoltória ($UA\,\Delta T$), sol nas
+superfícies opacas e vidros, ocupantes (\SI{75}{W} sensíveis e \SI{55}{W} latentes por pessoa),
+equipamentos (\SI{100}{W}) e ventilação sensível e latente (psicrometria de Buck, UR
+50\,\%). O FreshWell 3000 publica \SI{2700}{W} nominais; há margem para uma pessoa e
+déficit de \SI{0,17}{kW} com duas pessoas na vazão de CO$_2$.
+
+\itemsec{33}{Temperatura dos freios (30 → 10 m/s em 5 s)}
+\resposta{\textbf{Pico de \SI{293}{\celsius}} na superfície do disco dianteiro sem regeneração
+(\SI{3976,5}{kg}); \SI{313}{\celsius} no PBT; \SI{252}{\celsius} e \SI{213}{\celsius} com
+regeneração de \SI{40}{kW} e \SI{80}{kW}.}
+
+A energia dissipada por atrito é \SI{1,46}{MJ} (energia cinética \SI{1,59}{MJ} menos arrasto e
+rolamento). A condução transiente axissimétrica no disco,
+\begin{equation}
+\rho c_p \frac{\partial T}{\partial t} = \frac{1}{r}\frac{\partial}{\partial r}\!\left(k r \frac{\partial T}{\partial r}\right) + \frac{\partial}{\partial z}\!\left(k\frac{\partial T}{\partial z}\right),
+\end{equation}
+recebe o fluxo de atrito na faixa de contato (\SIrange{100}{145}{mm}), com 70\,\% na dianteira
+e 90\,\% no disco, e convecção de 20 e \SI{50}{W/(m^2.K)}. Malhas de 24$\times$8 a
+96$\times$32 dão o mesmo pico (diferença menor que \SI{0,02}{K}); a solução foi verificada
+contra uma solução analítica 1D (ordem 1,96).
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.49\linewidth]{i33_campo.png}\hfill
+\includegraphics[width=0.49\linewidth]{i33_historico.png}
+\caption{Item 33 — campo $T(r,z)$ no fim da frenagem e histórico de temperatura.}
+\end{figure}
+
+\itemsec{34}{Temperatura da bateria em carga de 20 kW e 80 kW}
+\resposta{Carga de 20 a 80\,\% de SOC a partir de \SI{25}{\celsius}: com \textbf{\SI{20}{kW}},
+\SI{2,96}{h} e temperatura final de \textbf{\SI{25,9}{\celsius}}; com \textbf{\SI{80}{kW}},
+\SI{0,76}{h} e \textbf{\SI{32,0}{\celsius}}. Em 54 casos de sensibilidade, as faixas são
+\SIrange{25,5}{26,6}{\celsius} e \SIrange{29,7}{34,9}{\celsius}.}
+\begin{align}
+C_b \frac{dT_b}{dt} &= I^2 R(SOC,T) + I\,T\frac{\partial U_{oc}}{\partial T} - UA_{bc}(T_b - T_c),\\
+C_c \frac{dT_c}{dt} &= UA_{bc}(T_b - T_c) - UA_{ca}(T_c - T_a),
+\end{align}
+com $P = U_{oc} I + R I^2$, massa térmica de \SI{650}{kg}$\times$\SI{900}{J/(kg.K)} e refrigerante
+de \SI{20}{kg}. Os resíduos de energia ficam abaixo de \SI{2e-7}{J}.
+\begin{figure}[H]
+\centering\includegraphics[width=0.85\linewidth]{i34_bateria.png}
+\caption{Item 34 — SOC e temperaturas da bateria e do refrigerante nas cargas de 20 e 80 kW.}
+\end{figure}
+
+\itemsec{35}{Bomba, radiador e vazão de arrefecimento}
+\resposta{Bomba Bosch PCE2-XL: ponto de operação de \textbf{\SI{31,9}{L/min}}
+(\SI{0,557}{kg/s}) a \SI{71,6}{kPa}, \SI{96}{W} elétricos e \SI{38}{W} hidráulicos
+(eficiência 40\,\%). Radiador de fluxo cruzado com $UA = \SI{1000}{W/K}$ e \SI{1}{kg/s} de
+ar: rejeita \SI{22,9}{kW} na potência de pico com rendimento 90\,\%, com o fluido entrando a
+\SI{66,8}{\celsius} e retornando a \SI{55,1}{\celsius}.}
+
+A curva do circuito (\SI{6}{m} de mangueira de \SI{20}{mm}, perdas singulares e quedas nos
+componentes) usa Darcy--Weisbach e Haaland,
+\begin{equation}
+\Delta p_{sis}(Q) = \left(f\frac{L}{D} + \sum K\right)\frac{\rho V^2}{2} + \sum_c \Delta p_c\left(\frac{Q}{Q_{ref}}\right)^2,
+\end{equation}
+e cruza a curva da bomba num único ponto. O radiador é resolvido célula a célula (64$\times$64),
+com cada fluido não misturado, e verificado contra a efetividade exata
+$\varepsilon$--NTU (erro de $5\times10^{-6}$, ordem 2).
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.49\linewidth]{i35_ponto_operacao.png}\hfill
+\includegraphics[width=0.49\linewidth]{i35_radiador.png}
+\caption{Item 35 — ponto de operação da bomba e perfis de temperatura do refrigerante e do ar.}
+\end{figure}
+\limite{com rendimento combinado de 85\,\% (\SI{36,3}{kW}), o fluido entraria a
+\SI{91,4}{\celsius}; o pico de \SI{205}{kW} é de curta duração.}
+
+%======================================================================
+\section{Resumo dos resultados}
+
+\begin{longtable}{>{\raggedright}p{0.6cm}>{\raggedright}p{4.3cm}p{10.4cm}}
+\caption{Resumo dos 35 itens.}\label{tab:resumo}\\
+\toprule
+Item & Grandeza & Resultado \\
+\midrule\endfirsthead
+\toprule Item & Grandeza & Resultado \\ \midrule\endhead
+1 & Nome & Aurora Solar, Fiat E-Ducato L3H2 4250 kg, 2 pessoas \\
+2 & Pneus/rodas & 225/75 R16C 121R, 6,5J$\times$16, 4,5/5,0 bar \\
+3 & Freios & discos ventilados 300$\times$32 mm, ABS/ESC, regeneração \\
+4 & Motor & PMSM 205 kW / 410 N\,m, base 4775 rpm, $\eta_{max}$ 95,5\,\% (modelo) \\
+5 & Transmissão & redutor fixo $i\approx10$, $\eta = 0{,}97$, tração dianteira \\
+6 & Baterias & tração LFP 110/98 kWh 400 V; serviços 3$\times$US5000, 14,4 kWh 48 V \\
+7 & Fiação & HV 120 mm² RADOX; 48 V 70--120 mm², fusível 200 A; 220 V/60 Hz \\
+8 & Painéis & 1540 Wp Maxeon IBC (21,5--22,1\,\%, 7,07 m²) + 1600 Wp portáteis; 13,9 kWh/dia \\
+9 & Controladoras/inversor & MPPT 250/60 e 150/60 (99\,\%); MultiPlus-II 5000 (96\,\%) \\
+10 & Resfriamento & água-glicol, radiador frontal; 10,9--36,3 kW a 205 kW \\
+11 & HVAC & FreshWell 3000 (2,7 kW frio, 3 kW calor); ventilação natural \\
+12 & Lubrificação & sem óleo de motor; óleo do redutor, graxas \\
+13 & Interior & cama fixa, cassete, chuveiro, indução, frigobar 93 L, lava e seca \\
+14 & Suspensão/direção & McPherson / eixo rígido com feixe; EPS; $a_y \approx 0{,}96$ g \\
+15 & Chassi & monobloco 5,998$\times$2,050$\times$2,61 m, entre-eixos 4,035 m \\
+16 & Carenagem & aço OEM, claraboia, janela, isolamento 32 mm, $U = 0{,}746$ W/(m²K) \\
+17 & Geometria 3D & três vistas cotadas (Fig.~\ref{fig:vistas}) \\
+18 & Massa montada & 3976,5 kg; 1988 kg por eixo \\
+19 & $C_d$, $A$ & $C_d = \CdValor$, $A = 4{,}828$ m² (CFD, 3 malhas) \\
+20 & $C_r$ & 0,012 (0,008--0,016) \\
+21 & Forças & 673 N a 40 km/h; 1287 N a 80 km/h \\
+22 & Potências & 7,5 / 28,6 kW nas rodas; 9,0 / 32,5 kW na bateria \\
+23 & Capacidade & 112,4 kWh úteis (98 + 14,4) \\
+24 & Custo & R\$ 789 mil (721--882 mil) com impostos de importação \\
+25 & Autonomia solar & 57,6 km a 40 km/h; 31,9 km a 80 km/h \\
+26 & Consumo & 4,44 km/kWh a 40 km/h; 2,46 km/kWh a 80 km/h \\
+27 & Autonomia diária & 351,5 km a 20,7 km/h (17 h); 309,5 km em 8 h \\
+28 & Vmax, 0--100 & 90 km/h (limitador); 0--100 inalcançável; 0--90 em 10,6 s \\
+29 & 7000 km & \IbResumo \\
+30 & Cabos & 489 A RMS, 85 °C (77--124 °C) \\
+31 & Cabine fechada & 49,1 °C (zona única); 50,3 °C médio no CFD 3D \\
+32 & A/C & 2,65 kW (2,87 kW com ventilação por CO$_2$) \\
+33 & Freios & pico de 293 °C (213--313 °C) \\
+34 & Bateria em carga & 25,9 °C (20 kW); 32,0 °C (80 kW) \\
+35 & Bomba/radiador & 31,9 L/min, 71,6 kPa; 22,9 kW rejeitados; 66,8/55,1 °C \\
+\bottomrule
+\end{longtable}
+
+\section{Limitações e conclusões}
+
+O Aurora Solar atende à missão de habitação para duas pessoas com energia solar: os
+\SI{13,9}{kWh/dia} de 21 de junho cobrem o consumo de habitação (\SI{7,2}{kWh/dia}) com
+sobra. Para a tração, a energia solar é pequena frente ao consumo de um furgão de
+\SI{4}{t}: um dia de sol de inverno equivale a \SIrange{32}{58}{km}. Por isso a viagem de
+\SI{7000}{km} só com energia solar leva vários meses, e a velocidade ótima fica próxima
+de \SI{20}{km/h}, onde o consumo por quilômetro é mínimo.
+
+As principais limitações são: (1) a interface CC que leva energia solar à bateria de tração é
+uma hipótese, não um produto autorizado pelo fabricante; (2) os mapas do motor, a relação
+do redutor e os limites por eixo não são publicados; (3) as simulações não foram
+validadas experimentalmente. Cada item indica a sua limitação específica.
+
+%======================================================================
+\begin{thebibliography}{99}\small
+\bibitem{arrow} ARROW MOBILITY. Arrow One, furgão elétrico nacional. \url{https://www.arrowmobility.com.br}. Acesso em: 16 nov. 2026.
+\bibitem{vegini} VEGINI. Motorhome 100\% elétrico Evolve. \url{https://vegini.com.br/produto/motorhome-100-eletrico/}. Acesso em: 16 nov. 2026.
+\bibitem{stellavita} SOLAR TEAM EINDHOVEN. Stella Vita. \url{https://solarteameindhoven.nl/stella-family}. Acesso em: 16 nov. 2026.
+\bibitem{fiatsk} FIAT PROFESSIONAL. E-Ducato — cenník a technické údaje, 20/03/2026. \url{https://www.fiat.sk/content/dam/fiat2023/sk/cenniky/2026/03/e_Ducato_pricelist_dodavka_200326.pdf}. Acesso em: 23 out. 2026.
+\bibitem{fiatuk} FIAT PROFESSIONAL UK. Ducato Electric — FAQ. \url{https://www.fiat.co.uk/professional/models/ducato-electric}. Acesso em: 26 out. 2026.
+\bibitem{fiatde} FIAT PROFESSIONAL DE. E-Ducato technische Daten. \url{https://www.fiat.de/professional/modelle/e-ducato/technical-data}. Acesso em: 26 out. 2026.
+\bibitem{hendershot} HENDERSHOT, J. R.; MILLER, T. J. E. \emph{Design of Brushless Permanent-Magnet Machines}. Motor Design Books, 2010.
+\bibitem{maxeon} MAXEON SOLAR TECHNOLOGIES. Maxeon 3 COM 380--400 W datasheet 544454. \url{https://sunpower.maxeon.com/int/sites/default/files/2022-05/sp_max3_104c_com_380-400_dc_ds_en_a4_544454.pdf}. Acesso em: 9 nov. 2026.
+\bibitem{pvlib} HOLMGREN, W. F.; HANSEN, C. W.; MIKOFSKI, M. A. pvlib python: a python package for modeling solar energy systems. \emph{Journal of Open Source Software}, v. 3, n. 29, p. 884, 2018.
+\bibitem{victron} VICTRON ENERGY. Price list 2026 Q2 (USD) e fichas técnicas SmartSolar MPPT e MultiPlus-II GX. \url{https://latam.victronenergy.com/wp-content/uploads/2026/04/Pricelist-Victron-2026-Q2-USD-C.pdf}. Acesso em: 9 nov. 2026.
+\bibitem{pylontech} PYLONTECH. US5000 product page. \url{https://en.pylontech.com.cn/products/c23/134.html}. Acesso em: 9 nov. 2026.
+\bibitem{hucho} HUCHO, W.-H. (ed.). \emph{Aerodynamics of Road Vehicles}. 4. ed. SAE International, 1998.
+\bibitem{stern} STERN, F. et al. Comprehensive approach to verification and validation of CFD simulations — Part 1: methodology and procedures. \emph{Journal of Fluids Engineering}, v. 123, n. 4, p. 793--802, 2001.
+\bibitem{celik} CELIK, I. B. et al. Procedure for estimation and reporting of uncertainty due to discretization in CFD applications. \emph{Journal of Fluids Engineering}, v. 130, 078001, 2008.
+\bibitem{apostila} Apostila da disciplina SEM0571 — Sistemas Térmicos e Fluídicos, v0.4, EESC-USP, 2025.
+\bibitem{incropera} INCROPERA, F. P. et al. \emph{Fundamentos de Transferência de Calor e de Massa}. 7. ed. LTC, 2014.
+\bibitem{conti} CONTINENTAL. VanContact A/S — specifications, artigo 04514690000. \url{https://continentaltire.com/tires/vancontact-as/specs}. Acesso em: 25 out. 2026.
+\bibitem{ducatomanual} FIAT. Ducato — Manual do proprietário, tabela de pressões de enchimento a frio. \url{https://www.manualslib.com/manual/1051526/Fiat-Ducato.html?page=221}. Acesso em: 16 nov. 2026.
+\bibitem{brembo} BREMBO. Disco 09.D018.11. \url{https://www.bremboparts.com/europe/en/catalogue/disc/09-D018-11}. Acesso em: 26 out. 2026.
+\bibitem{topczewska} TOPCZEWSKA, K. et al. Temperature and thermal stresses of a ventilated brake disc. \emph{Materials}, v. 15, 6821, 2022. DOI 10.3390/ma15196821.
+\bibitem{radox} HUBER+SUHNER. RADOX 155 FLR4G/FLHR4G, STD 718404 G. Acesso em: 26 out. 2026.
+\bibitem{bosch} BOSCH. Auxiliary water pump PCE2-XL 0392024453G. \url{https://www.bosch-ibusiness.com}. Acesso em: 26 out. 2026.
+\bibitem{dometic} DOMETIC. FreshWell 3000 — manual e dados técnicos. \url{https://www.dometic.com/en/outdoor/rv-and-van/rv-air-conditioners/dometic-freshwell-3000--28972}. Acesso em: 16 nov. 2026.
+\bibitem{armaflex} ARMACELL. AF/ArmaFlex technical specifications. \url{https://www.armacell.com/en-DE/product/technical-specs/afarmaflex}. Acesso em: 25 out. 2026.
+\bibitem{openx} ULUS, D. OpenX Assets, release 20261015 (Fiat Ducato 2014, de razor24). \url{https://github.com/vevalabs/openx-assets}. Acesso em: 23 out. 2026.
+\bibitem{gillespie} GILLESPIE, T. D. \emph{Fundamentals of Vehicle Dynamics}. SAE International, 1992.
+\bibitem{euLabel} UNIÃO EUROPEIA. Regulamento (UE) 2020/740 — rotulagem de pneus (classes de resistência ao rolamento C2).
+\bibitem{ii35} CANALTECH. Imposto de 35\% já entrou em vigor: carros elétricos vão ficar mais caros. \url{https://canaltech.com.br/carros/imposto-de-35-ja-entrou-em-vigor-carros-eletricos-vao-ficar-mais-caros/}. Acesso em: 16 nov. 2026.
+\end{thebibliography}
+
+%======================================================================
+\appendix
+\section{Anexo — códigos das simulações}\label{sec:anexo}
+
+Todo o código está no repositório \url{https://github.com/MHC-CodeSmith/STF_MotorHome}
+(ramo \cod{main}). Os comandos abaixo são executados na raiz, com o ambiente
+\cod{.venv} criado por \cod{uv pip install -e '.[dev,cad]'}. Cada script grava, junto
+dos resultados, o SHA-256 das entradas e da configuração. A suíte de testes
+(\cod{PYTHONPATH=src .venv/bin/python -m pytest -q}) verifica conservação de energia,
+soluções analíticas e convergência dos modelos.
+
+\begin{longtable}{>{\raggedright}p{1.4cm}>{\raggedright\arraybackslash\small}p{6.6cm}>{\raggedright\arraybackslash}p{7.2cm}}
+\toprule
+Itens & Script & Modelo / método \\
+\midrule\endhead
+8, 25--29 & \path{scripts/executar_cenario_integrado.py} & cadeia integrada de 17 etapas (solar, energia, massa, freios) \\
+8 & \path{src/motorhome/solar.py} & pvlib, céu claro, Faiman \\
+17 & \path{relatorio/gerar_figuras.py} & vistas cotadas da geometria do CFD \\
+19 & \path{scripts/executar_aero_malha_adicional.py}, \path{scripts/calcular_gci_aero.py} & OpenFOAM 2412 \path{snappyHexMesh}/\path{simpleFoam}; incerteza de malha (Celik/Stern) \\
+21--22, 26 & \path{scripts/sensibilizar_resistencias_rota.py} & equilíbrio longitudinal, 8100 casos \\
+24 & \path{scripts/calcular_custo_brl_i24.py} & cascata tributária de importação \\
+25 & \path{scripts/desenvolver_despacho_i25.py} & MILP de despacho solar \\
+27 & \path{scripts/desenvolver_energia_sistemas.py} & Jensen + mínimo de $e(v)$ \\
+28 & \path{scripts/desenvolver_mecanica_termica.py} & integração da aceleração \\
+29 & \path{scripts/fechar_i29_velocidade.py} & busca em grade 5 min + refino 1 min \\
+30 & \path{scripts/fechar_i30_corrente_maxima.py}, \path{src/motorhome/cabos_polares.py} & volumes finitos $r$--$\theta$, Churchill--Chu \\
+31--32 & \path{scripts/calcular_cabine.py}, \path{scripts/desenvolver_cabine_cfd.py} & zona única + CFD 3D transiente \\
+33 & \path{scripts/integrar_freios_massa.py}, \path{src/motorhome/freios_axisimetricos.py} & Crank--Nicolson $r$--$z$ \\
+34 & \path{scripts/calcular_bateria_carga.py}, \path{src/motorhome/bateria_carga.py} & circuito equivalente + 2 nós térmicos \\
+35 & \path{scripts/calcular_hidraulica.py}, \path{src/motorhome/radiador_cruzado.py} & Darcy--Weisbach + $\varepsilon$--NTU discreto \\
+\bottomrule
+\end{longtable}
+
+\input{anexo_codigos}
+
+\end{document}
