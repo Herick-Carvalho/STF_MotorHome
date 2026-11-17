@@ -103,7 +103,8 @@ Decisões provisórias com você entre os responsáveis: A04 (Autonomia e módul
 
 Decisões provisórias com você entre os responsáveis: A14 (Parâmetros físicos e validação); A15 (Proteções, controle e monitoramento).
 
-**Parecer registrado (16/11/2026):** [PARECER_P7_HERICK_ELISEU.md](PARECER_P7_HERICK_ELISEU.md), Herick Eliseu.
+**Parecer registrado (16/11/2026):** [PARECER_P7_HERICK_ELISEU.md](PARECER_P7_HERICK_ELISEU.md), Herick Eliseu
+(issue [#3](https://github.com/MHC-CodeSmith/STF_MotorHome/issues/3), PR [#2](https://github.com/MHC-CodeSmith/STF_MotorHome/pull/2)).
 Aprovado com correções: 6 obrigatórias e 5 recomendadas, com página e o que muda; A14 e A15 comentadas.
 
 ## Registro dos pareceres
@@ -116,7 +117,7 @@ Aprovado com correções: 6 obrigatórias e 5 recomendadas, com página e o que 
 | P4 | | | pendente | |
 | P5 | | | pendente | |
 | P6 | | | pendente | |
-| P7 | Herick Eliseu | 16/11/2026 | aprovado com correções ([parecer](PARECER_P7_HERICK_ELISEU.md)); correções a aplicar | PR |
+| P7 | Herick Eliseu | 16/11/2026 | aprovado com correções ([parecer](PARECER_P7_HERICK_ELISEU.md)); correções a aplicar | [#3](https://github.com/MHC-CodeSmith/STF_MotorHome/issues/3) (PR [#2](https://github.com/MHC-CodeSmith/STF_MotorHome/pull/2)) |
 
 Atualizar esta tabela quando cada issue for fechada. O P7 registrou o parecer por pull request, com o texto completo
 em `docs/` e os mesmos campos do modelo de issue. A aprovação não remove as ressalvas técnicas do relatório
